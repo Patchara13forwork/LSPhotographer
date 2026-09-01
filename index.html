@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ชมรมถ่ายภาพ | โรงเรียนลาซาล</title>
+<script>
+// ตั้งค่า theme/cvd ก่อนหน้าเว็บ render เพื่อไม่ให้เห็นการกระพริบสีผิดตอนโหลด
+(function(){
+  try{
+    var theme = localStorage.getItem('lsc_theme') || 'dark';
+    var cvd = localStorage.getItem('lsc_cvd') || 'none';
+    document.documentElement.setAttribute('data-theme', theme);
+    if(cvd !== 'none') document.documentElement.setAttribute('data-cvd', cvd);
+  }catch(e){}
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Noto+Sans+Thai:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ============================================================
+   DESIGN TOKENS — dark (default), light, และ color-vision modes
+   สลับด้วย data-theme และ data-cvd บน <html>
+   ============================================================ */
+:root{
+  --red:#c8102e; --red2:#e0233f; --red3:#f43d56;
+  --ff-display:'Playfair Display',serif;
+  --ff-body:'Noto Sans Thai',sans-serif;
+  --ff-mono:'DM Mono',monospace;
+
+  /* dark theme (default) */
+  --bg:#0a0a0c; --bg2:#0e0d10; --bg3:#131014;
+  --cream:#f3ece9; --text:#b9a8ab; --muted:#d8c6c9;
+  --border:#221a1e; --border2:#332128;
+  --card:#0f0d10; --card2:#161116;
+  --shadow-a:0; /* glow intensity multiplier: off by default in refined pass */
+}
+
+html[data-theme="light"]{
+  --bg:#f7f4f1; --bg2:#efe9e4; --bg3:#e8e0da;
+  --cream:#1c1416; --text:#4a3a3d; --muted:#5c484c;
+  --border:#e0d5cf; --border2:#d3c2bb;
+  --card:#fffdfc; --card2:#fbf6f3;
+}
+
+/* Deuteranopia (ตาบอดสีเขียว) — เลื่อน accent จากแดงไปโทนที่แยกแยะได้ชัดขึ้น */
+html[data-cvd="deuteranopia"]{ --red:#b8862e; --red2:#d4a13f; --red3:#e8b84f; }
+/* Protanopia (ตาบอดสีแดง) — ใช้เหลือง-น้ำเงินแทนคู่แดง-เขียว */
+html[data-cvd="protanopia"]{ --red:#4a7fc8; --red2:#5f95e0; --red3:#78aef5; }
+/* Tritanopia (ตาบอดสีน้ำเงิน-เหลือง) — คงโทนแดง-ชมพูซึ่งแยกแยะง่ายสุดสำหรับกลุ่มนี้ */
+html[data-cvd="tritanopia"]{ --red:#c81f4d; --red2:#e03a68; --red3:#f4527f; }
+
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--ff-body);line-height:1.75;overflow-x:hidden;transition:background .3s ease,color .3s ease;}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--red);opacity:.5}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:0.03;}
+body::after{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);width:900px;height:400px;background:radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--red) 10%, transparent) 0%, transparent 70%);pointer-events:none;z-index:0;}
+
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+/* ---- SETTINGS MENU (รวม: ธีม, การมองเห็นสี, ภาษา, วิธีใช้ ไว้ในปุ่มเดียว) ---- */
+.settings{position:relative}
+.settings-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--card2);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s;}
+.settings-btn:hover{border-color:var(--red);color:var(--red)}
+.settings-panel{position:absolute;top:calc(100% + .75rem);right:0;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:.5rem;width:250px;display:none;box-shadow:0 16px 48px rgba(0,0,0,0.45);}
+.settings-panel.open{display:block}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;border-radius:6px;transition:background .15s;}
+.settings-row:hover{background:color-mix(in srgb, var(--red) 5%, transparent)}
+.settings-row-label{font-size:.8rem;color:var(--text);}
+.settings-inline-opts{display:flex;gap:.3rem}
+.settings-chip{font-family:var(--ff-mono);font-size:.65rem;padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border2);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s;}
+.settings-chip:hover{border-color:var(--red)}
+.settings-chip.active{background:var(--red);border-color:var(--red);color:#fff}
+.settings-divider{height:1px;background:var(--border2);margin:.35rem .25rem;}
+.settings-link-row{width:100%;background:none;border:none;text-align:left;cursor:pointer;font-family:var(--ff-body);}
+.settings-cvd-group{padding:.4rem .75rem .2rem;}
+.settings-cvd-group .settings-row-label{display:block;margin-bottom:.5rem;}
+.settings-cvd-opts{display:flex;flex-direction:column;gap:.3rem}
+.settings-cvd-opts .settings-chip{text-align:left}
+
+/* ---- HELP MODAL ---- */
+.help-modal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem;}
+.help-modal.open{display:flex}
+.help-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);}
+.help-modal-box{position:relative;background:var(--card2);border:1px solid var(--border2);border-radius:12px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:2rem;box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.help-modal-box h3{font-family:var(--ff-display);font-size:1.4rem;color:var(--cream);margin-bottom:1.5rem;}
+.help-modal-close{position:absolute;top:1.25rem;right:1.25rem;width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .2s;}
+.help-modal-close:hover{border-color:var(--red);color:var(--red)}
+.help-step{display:flex;gap:1rem;margin-bottom:1.5rem;}
+.help-step:last-child{margin-bottom:0}
+.help-step-num{width:28px;height:28px;min-width:28px;border-radius:50%;background:color-mix(in srgb, var(--red) 12%, transparent);border:1px solid color-mix(in srgb, var(--red) 30%, transparent);display:flex;align-items:center;justify-content:center;font-family:var(--ff-mono);font-size:.7rem;color:var(--red);}
+.help-step-body h4{font-size:.88rem;color:var(--cream);font-weight:500;margin-bottom:.3rem}
+.help-step-body p{font-size:.8rem;color:var(--muted);line-height:1.65}
+
+/* ---- CHATBOT WIDGET ---- */
+.chat-fab{position:fixed;bottom:1.5rem;right:1.5rem;z-index:400;width:56px;height:56px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.35);transition:transform .2s,background .2s;}
+.chat-fab:hover{background:var(--red2);transform:scale(1.05)}
+.chat-fab svg{width:26px;height:26px}
+.chat-fab .chat-fab-close-icon{display:none}
+.chat-fab.open .chat-fab-chat-icon{display:none}
+.chat-fab.open .chat-fab-close-icon{display:block}
+.chat-fab .unread-dot{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--red);display:none;}
+.chat-fab .unread-dot.show{display:block}
+
+.chat-box{position:fixed;bottom:5.5rem;right:1.5rem;z-index:400;width:360px;max-width:calc(100vw - 2rem);height:min(520px,70vh);background:var(--card2);border:1px solid var(--border2);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.45);display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(10px);}
+.chat-box.open{display:flex}
+.chat-header{background:color-mix(in srgb, var(--bg) 92%, transparent);border-bottom:1px solid var(--border2);padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem;}
+.chat-header-icon{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.chat-header-text h4{font-family:var(--ff-display);font-size:.95rem;color:var(--cream);line-height:1.2;}
+.chat-header-text span{font-family:var(--ff-mono);font-size:.62rem;color:var(--muted);display:flex;align-items:center;gap:.3rem;}
+.chat-header-text span::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;}
+
+.chat-messages{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:.85rem;}
+.chat-msg{max-width:85%;font-size:.83rem;line-height:1.6;padding:.65rem .9rem;border-radius:10px;white-space:pre-wrap;word-wrap:break-word;}
+.chat-msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border2);color:var(--text);border-bottom-left-radius:3px;}
+.chat-msg.user{align-self:flex-end;background:var(--red);color:#fff;border-bottom-right-radius:3px;}
+.chat-msg.error{align-self:flex-start;background:color-mix(in srgb, var(--red) 12%, transparent);border:1px solid color-mix(in srgb, var(--red) 30%, transparent);color:var(--red2);}
+.chat-msg.typing{display:flex;gap:.3rem;align-items:center;padding:.8rem 1rem;}
+.chat-msg.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typingDot 1.2s infinite ease-in-out;}
+.chat-msg.typing span:nth-child(2){animation-delay:.2s}
+.chat-msg.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+.chat-suggestions{padding:0 1.1rem .75rem;display:flex;flex-wrap:wrap;gap:.4rem;}
+.chat-suggestion-btn{font-family:var(--ff-mono);font-size:.65rem;background:var(--card);border:1px solid var(--border2);color:var(--muted);padding:.4rem .7rem;border-radius:14px;cursor:pointer;transition:all .2s;}
+.chat-suggestion-btn:hover{border-color:var(--red);color:var(--red)}
+
+.chat-input-row{border-top:1px solid var(--border2);padding:.85rem;display:flex;gap:.6rem;align-items:flex-end;background:var(--card2);}
+.chat-input{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:.7rem .9rem;color:var(--cream);font-family:var(--ff-body);font-size:.83rem;outline:none;resize:none;max-height:90px;transition:border-color .2s;}
+.chat-input:focus{border-color:var(--red)}
+.chat-send-btn{width:38px;height:38px;min-width:38px;border-radius:8px;background:var(--red);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,opacity .2s;}
+.chat-send-btn:hover{background:var(--red2)}
+.chat-send-btn:disabled{opacity:.4;cursor:not-allowed}
+.chat-disclaimer{font-family:var(--ff-mono);font-size:.58rem;color:var(--muted);opacity:.7;text-align:center;padding:.4rem 0 0;}
+
+@media(max-width:768px){
+  .chat-box{width:calc(100vw - 1.5rem);right:.75rem;bottom:4.75rem;height:min(65vh,480px);}
+  .chat-fab{right:1rem;bottom:1rem}
+}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 3rem;background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border2);}
+.nav-logo{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;border:1px solid var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.nav-logo-icon img{width:100%;height:100%;object-fit:cover}
+.nav-logo-text{font-family:var(--ff-display);font-size:.95rem;color:var(--cream);letter-spacing:.02em}
+.nav-menu{display:flex;align-items:center;gap:2rem}
+.nav-links{display:flex;gap:2.25rem;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.8rem;letter-spacing:.06em;transition:color .2s;}
+.nav-links a:hover{color:var(--red)}
+.nav-join{font-family:var(--ff-mono);font-size:.75rem;color:#fff;background:var(--red);padding:.5rem 1.25rem;border-radius:3px;text-decoration:none;letter-spacing:.04em;transition:background .2s;}
+.nav-join:hover{background:var(--red2)}
+.hamburger{display:none;flex-direction:column;gap:6px;cursor:pointer}
+.hamburger span{width:24px;height:2px;background-color:var(--cream);border-radius:2px;transition:all .3s ease-in-out}
+
+#hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7rem 2rem 5rem;overflow:hidden;z-index:1;}
+#hero::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 50% 45%, color-mix(in srgb, var(--red) 14%, transparent) 0%, transparent 72%);}
+.aperture-bg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:640px;height:640px;border-radius:50%;border:1px solid color-mix(in srgb, var(--red) 14%, transparent);pointer-events:none;z-index:0;}
+.aperture-bg::before,.aperture-bg::after{content:'';position:absolute;border-radius:50%;border:1px solid color-mix(in srgb, var(--red) 8%, transparent);}
+.aperture-bg::before{inset:-60px}
+.aperture-bg::after{inset:-130px}
+.aperture-blades{position:absolute;inset:0;animation:rotateSlow 60s linear infinite;}
+.aperture-blades span{position:absolute;top:50%;left:50%;width:2px;height:50%;background:linear-gradient(180deg, color-mix(in srgb, var(--red) 30%, transparent), transparent);transform-origin:top center;}
+.hero-eyebrow{position:relative;z-index:1;font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.22em;color:var(--red);border-bottom:1px solid color-mix(in srgb, var(--red) 30%, transparent);padding-bottom:.5rem;margin-bottom:2rem;display:inline-block;animation:fadeUp .7s ease both;}
+h1.hero-title{position:relative;z-index:1;font-family:var(--ff-display);font-size:clamp(3rem,9vw,6.5rem);font-weight:700;line-height:1.05;color:var(--cream);animation:fadeUp .7s .1s ease both;margin-bottom:.5rem;}
+h1.hero-title em{color:var(--red);font-style:italic;}
+.hero-school{position:relative;z-index:1;font-family:var(--ff-mono);font-size:.8rem;letter-spacing:.18em;color:var(--muted);animation:fadeUp .7s .2s ease both;margin-top:.75rem;}
+.hero-desc{position:relative;z-index:1;max-width:480px;font-size:.9rem;color:var(--muted);margin-top:1.5rem;animation:fadeUp .7s .3s ease both;}
+.hero-cta{position:relative;z-index:1;display:flex;gap:1rem;margin-top:2.5rem;animation:fadeUp .7s .4s ease both;justify-content:center;}
+.btn-gold{background:var(--red);color:#fff;font-family:var(--ff-mono);font-size:.8rem;font-weight:500;padding:.8rem 2.25rem;border-radius:3px;text-decoration:none;letter-spacing:.05em;transition:background .2s,transform .2s;}
+.btn-gold:hover{background:var(--red2);transform:translateY(-1px);}
+.btn-ghost{border:1px solid var(--border2);color:var(--muted);font-family:var(--ff-mono);font-size:.8rem;padding:.8rem 2rem;border-radius:3px;text-decoration:none;letter-spacing:.05em;transition:border-color .2s,color .2s;}
+.btn-ghost:hover{border-color:var(--red);color:var(--red);}
+.filmstrip{position:absolute;bottom:0;left:0;right:0;height:70px;display:flex;overflow:hidden;opacity:.12;pointer-events:none;}
+.film-frame{min-width:70px;height:70px;border:1px solid var(--red);margin-right:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--ff-mono);font-size:.55rem;color:var(--red);}
+
+section{padding:6rem 2rem;position:relative;z-index:1}
+.container{max-width:960px;margin:0 auto}
+.section-label{font-family:var(--ff-mono);font-size:.65rem;letter-spacing:.22em;color:var(--red);display:block;margin-bottom:1rem;}
+h2.section-title{font-family:var(--ff-display);font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--cream);line-height:1.15;margin-bottom:.75rem;}
+.rule{width:40px;height:2px;margin-bottom:2.5rem;background:var(--red);border-radius:2px;}
+
+#about{background:var(--bg2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+
+/* ---- ABOUT: ข้อความ + ตัวเลขสำคัญ 2 ค่า เรียบง่าย ไม่แน่นเกินไป ---- */
+.about-layout{display:grid;grid-template-columns:1.7fr 1fr;gap:3rem;margin-top:2rem;align-items:start;}
+.about-copy p{font-size:.92rem;color:var(--text);line-height:1.9;max-width:60ch;}
+.about-copy p+p{margin-top:1.1rem}
+.about-facts{display:flex;flex-direction:column;gap:1.25rem;}
+.fact{padding:1.25rem 1.5rem;background:var(--card2);border:1px solid var(--border2);border-radius:10px;}
+.fact-num{font-family:var(--ff-display);font-size:2.1rem;color:var(--red);line-height:1;}
+.fact-label{font-size:.78rem;color:var(--muted);margin-top:.4rem}
+.about-cta{margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;}
+.about-cta p{font-size:.85rem;color:var(--muted);margin:0;}
+
+/* ---- TIMELINE: รายการลำดับเวลาแบบเรียบง่าย (numbering ใช้ที่นี่เพราะเนื้อหาเป็นลำดับจริง) ---- */
+#timeline{background:var(--bg)}
+.timeline-list{list-style:none;counter-reset:tl;margin-top:2rem;max-width:640px;}
+.timeline-list li{counter-increment:tl;display:flex;align-items:baseline;gap:1.25rem;padding:1.1rem 0;border-bottom:1px solid var(--border2);}
+.timeline-list li:last-child{border-bottom:none}
+.timeline-list li::before{content:counter(tl);font-family:var(--ff-mono);font-size:.75rem;color:var(--red);border:1px solid color-mix(in srgb, var(--red) 30%, transparent);width:26px;height:26px;min-width:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.timeline-when{font-family:var(--ff-mono);font-size:.75rem;color:var(--red);white-space:nowrap;min-width:140px}
+.timeline-name{font-size:.9rem;color:var(--cream);font-weight:500;}
+
+#categories{background:var(--bg)}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
+.cat-card{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:1.75rem 1.5rem;position:relative;transition:border-color .25s,background .25s;cursor:default;}
+.cat-card:hover{border-color:color-mix(in srgb, var(--red) 40%, var(--border2));background:color-mix(in srgb, var(--red) 3%, var(--card2));}
+.cat-icon{font-size:1.6rem;margin-bottom:.85rem;display:block}
+.cat-title{font-family:var(--ff-display);font-size:1.1rem;color:var(--cream);margin-bottom:.4rem}
+.cat-desc{font-size:.78rem;color:var(--muted);line-height:1.65}
+
+/* ---- ARCHIVE (Clean Grid + High-contrast) ---- */
+#archive{background:var(--bg2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+#archive .container{max-width:1100px}
+.search-bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:2rem}
+.search-input-wrap{position:relative;flex:1;min-width:260px;max-width:520px}
+.search-input{width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:8px;padding:1rem 1rem 1rem 3rem;color:var(--cream);font-family:var(--ff-body);font-size:.9rem;outline:none;transition:border-color .25s;}
+.search-input:focus{border-color:var(--red)}
+.search-input-wrap::before{content:'🔍';position:absolute;left:1rem;top:50%;transform:translateY(-50%);font-size:1rem;opacity:.5}
+.search-meta{font-family:var(--ff-mono);font-size:.7rem;color:var(--muted);opacity:.8}
+.section-subtitle{font-size:.9rem;color:var(--muted);margin-bottom:1.5rem;max-width:600px}
+
+.featured-label{font-family:var(--ff-mono);font-size:.6rem;letter-spacing:.18em;color:var(--red);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.featured-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--red),transparent);opacity:.3}
+
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
+.event-card{background:var(--card2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;position:relative;transition:border-color .25s,transform .25s;display:flex;flex-direction:column;}
+.event-card:hover{border-color:color-mix(in srgb, var(--red) 40%, var(--border2));transform:translateY(-3px);}
+.event-preview{height:160px;background:var(--card);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.event-preview img{width:100%;height:100%;object-fit:cover;opacity:.75;transition:opacity .3s,transform .4s}
+.event-card:hover .event-preview img{opacity:.95;transform:scale(1.03)}
+.event-preview .drive-badge{position:absolute;top:.75rem;right:.75rem;background:color-mix(in srgb, var(--bg) 85%, transparent);backdrop-filter:blur(4px);border:1px solid var(--border2);border-radius:4px;padding:.3rem .6rem;font-family:var(--ff-mono);font-size:.6rem;color:var(--red);display:flex;align-items:center;gap:.35rem;}
+.event-preview .drive-badge::before{content:'';display:inline-block;width:7px;height:7px;background:var(--red);border-radius:50%;}
+.event-body{padding:1.25rem 1.25rem 1rem;flex:1;display:flex;flex-direction:column}
+.event-date{font-family:var(--ff-mono);font-size:.65rem;letter-spacing:.1em;color:var(--red);margin-bottom:.35rem}
+.event-name{font-family:var(--ff-display);font-size:1.1rem;color:var(--cream);line-height:1.3;margin-bottom:.4rem}
+.event-desc{font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem;flex:1}
+.event-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.event-tag{font-family:var(--ff-mono);font-size:.6rem;letter-spacing:.04em;background:color-mix(in srgb, var(--red) 8%, transparent);color:var(--red);border:1px solid color-mix(in srgb, var(--red) 20%, transparent);padding:.2rem .5rem;border-radius:3px;}
+.event-actions{display:flex;gap:.6rem}
+.btn-drive{flex:1;text-align:center;background:var(--red);color:#fff;font-family:var(--ff-mono);font-size:.75rem;font-weight:500;padding:.65rem 1rem;border-radius:4px;text-decoration:none;letter-spacing:.03em;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+.btn-drive:hover{background:var(--red2);}
+.btn-ghost-sm{background:transparent;border:1px solid var(--border2);color:var(--muted);font-family:var(--ff-mono);font-size:.7rem;padding:.65rem 1rem;border-radius:4px;text-decoration:none;letter-spacing:.03em;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.3rem;}
+.btn-ghost-sm:hover{border-color:var(--red);color:var(--red)}
+
+.all-events-label{font-family:var(--ff-mono);font-size:.6rem;letter-spacing:.18em;color:var(--muted);margin:2.5rem 0 1rem;display:flex;align-items:center;gap:.5rem;}
+.all-events-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+.results-list{display:flex;flex-direction:column;gap:.5rem}
+.result-item{background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;transition:border-color .25s;cursor:pointer;text-decoration:none;}
+.result-item:hover{border-color:color-mix(in srgb, var(--red) 35%, var(--border2))}
+.result-date{font-family:var(--ff-mono);font-size:.65rem;color:var(--red);white-space:nowrap;min-width:110px}
+.result-info{flex:1}
+.result-name{font-size:.9rem;color:var(--cream);font-weight:500;margin-bottom:.15rem}
+.result-meta{font-size:.75rem;color:var(--muted)}
+.result-arrow{color:var(--muted);font-family:var(--ff-mono);font-size:1rem;transition:color .2s,transform .2s}
+.result-item:hover .result-arrow{color:var(--red);transform:translateX(3px)}
+.empty-state{text-align:center;padding:3rem 2rem;border:1px dashed var(--border2);border-radius:8px}
+.empty-state p{font-size:.9rem;color:var(--muted)}
+.empty-state .hint{font-family:var(--ff-mono);font-size:.7rem;color:var(--red);margin-top:.5rem}
+
+#location{background:var(--bg2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;margin-top:2rem}
+.loc-info h3{font-size:.95rem;color:var(--cream);font-weight:500;margin-bottom:.4rem}
+.loc-info p{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.8}
+.map-wrap{background:var(--card2);border:1px solid var(--border2);border-radius:6px;overflow:hidden;height:260px;}
+.map-wrap iframe{width:100%;height:100%;border:none}
+html[data-theme="dark"] .map-wrap iframe{filter:invert(.85) hue-rotate(180deg) saturate(.3) brightness(.9)}
+
+#faqs{background:var(--bg)}
+.faq-list{margin-top:2rem;display:flex;flex-direction:column;gap:.6rem}
+.faq-item{background:var(--card2);border:1px solid var(--border2);border-radius:6px;overflow:hidden;transition:border-color .25s}
+.faq-item:hover{border-color:color-mix(in srgb, var(--red) 25%, var(--border2))}
+.faq-q{width:100%;background:none;border:none;color:var(--text);font-family:var(--ff-body);font-size:.875rem;padding:1.1rem 1.5rem;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:color .2s}
+.faq-q:hover{color:var(--red)}
+.faq-arrow{font-family:var(--ff-mono);font-size:1.1rem;color:var(--muted);transition:transform .3s, color .3s}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.faq-a p{padding:0 1.5rem 1.1rem;font-size:.82rem;color:var(--muted);line-height:1.8}
+.faq-item.open .faq-arrow{transform:rotate(45deg);color:var(--red)}
+.faq-item.open .faq-a{max-height:300px}
+.faq-item.open{border-color:color-mix(in srgb, var(--red) 30%, var(--border2))}
+
+footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2rem 2rem;position:relative}
+.footer-inner{max-width:960px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem}
+.footer-brand h3{font-family:var(--ff-display);font-size:1.3rem;color:var(--cream);margin-bottom:.4rem}
+.footer-brand p{font-size:.8rem;color:var(--muted);line-height:1.8}
+.footer-brand .email{color:var(--red);margin-top:.5rem;font-family:var(--ff-mono);font-size:.75rem;}
+.footer-col h4{font-family:var(--ff-mono);font-size:.65rem;letter-spacing:.18em;color:var(--muted);margin-bottom:1rem}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.footer-col a{font-size:.82rem;color:var(--muted);text-decoration:none;transition:color .2s;}
+.footer-col a:hover{color:var(--red)}
+.footer-bottom{max-width:960px;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center;font-family:var(--ff-mono);font-size:.65rem;color:var(--muted);letter-spacing:.06em}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rotateSlow{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.25rem}
+  .hamburger{display:flex}
+  .nav-menu{display:none;flex-direction:column;position:absolute;top:100%;left:0;width:100%;background:color-mix(in srgb, var(--bg) 98%, transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border2);padding:2rem;gap:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+  .nav-menu.active{display:flex}
+  .nav-links{flex-direction:column;align-items:center;gap:1.5rem;width:100%;}
+  .hamburger.active span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+  .hamburger.active span:nth-child(2){opacity:0}
+  .hamburger.active span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+  .location-grid,.footer-inner{grid-template-columns:1fr}
+  .about-layout{grid-template-columns:1fr}
+  .about-facts{flex-direction:row}
+  .about-cta{flex-direction:column;align-items:flex-start;}
+  .timeline-list li{flex-direction:column;align-items:flex-start;gap:.35rem}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .events-grid{grid-template-columns:1fr}
+  .search-bar{flex-direction:column;align-items:stretch}
+  .result-item{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .result-date{min-width:auto}
+  .footer-bottom{flex-direction:column;gap:.5rem;text-align:center}
+  .settings-panel{right:-1rem;width:230px}
+  .help-modal-box{width:94vw;max-height:85vh}
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon"><img src="https://lh3.googleusercontent.com/d/1ljlTSC87QUbqZXWfyqsRQA0xkfFxRfFm" alt="โลโก้ชมรมถ่ายภาพ"></div>
+    <span class="nav-logo-text" data-i18n="nav.brand">ชมรมถ่ายภาพโรงเรียนลาซาล</span>
+  </a>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+  <div class="nav-menu" id="nav-menu">
+    <ul class="nav-links">
+      <li><a href="#about" data-i18n="nav.about">เกี่ยวกับเรา</a></li>
+      <li><a href="#categories" data-i18n="nav.categories">ประเภทภาพ</a></li>
+      <li><a href="#archive" data-i18n="nav.archive">คลังภาพ</a></li>
+      <li><a href="#faqs" data-i18n="nav.faqs">FAQs</a></li>
+    </ul>
+    <a href="#about" class="nav-join" data-i18n="nav.join">สมัครสมาชิก</a>
+
+    <div class="settings">
+      <button class="settings-btn" id="settingsBtn" aria-label="ตั้งค่า" aria-expanded="false">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+      <div class="settings-panel" id="settingsPanel">
+        <div class="settings-row">
+          <span class="settings-row-label" data-i18n="prefs.colorMode">โหมดสี</span>
+          <div class="settings-inline-opts">
+            <button class="settings-chip" data-theme-opt="dark" data-i18n="prefs.dark">มืด</button>
+            <button class="settings-chip" data-theme-opt="light" data-i18n="prefs.light">สว่าง</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-row-label" data-i18n="prefs.langLabel">ภาษา</span>
+          <div class="settings-inline-opts">
+            <button class="settings-chip" data-lang-opt="th">TH</button>
+            <button class="settings-chip" data-lang-opt="en">EN</button>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-cvd-group">
+          <span class="settings-row-label" data-i18n="prefs.cvdLabel">สำหรับผู้ที่ตาบอดสี</span>
+          <div class="settings-cvd-opts">
+            <button class="settings-chip" data-cvd-opt="none" data-i18n="prefs.cvdNone">ปกติ</button>
+            <button class="settings-chip" data-cvd-opt="protanopia" data-i18n="prefs.cvdPro">Protanopia (ตาบอดสีแดง)</button>
+            <button class="settings-chip" data-cvd-opt="deuteranopia" data-i18n="prefs.cvdDeu">Deuteranopia (ตาบอดสีเขียว)</button>
+            <button class="settings-chip" data-cvd-opt="tritanopia" data-i18n="prefs.cvdTri">Tritanopia (ตาบอดสีน้ำเงิน)</button>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <button class="settings-row settings-link-row" id="helpBtn">
+          <span class="settings-row-label" data-i18n="help.menuLabel">วิธีใช้เว็บไซต์</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HELP MODAL (วิธีใช้เว็บไซต์) ===================== -->
+<div class="help-modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+  <div class="help-modal-backdrop" id="helpModalBackdrop"></div>
+  <div class="help-modal-box">
+    <button class="help-modal-close" id="helpModalClose" aria-label="ปิด">✕</button>
+    <h3 id="helpModalTitle" data-i18n="help.title">วิธีใช้เว็บไซต์</h3>
+
+    <div class="help-step">
+      <div class="help-step-num">1</div>
+      <div class="help-step-body">
+        <h4 data-i18n="help.step1Title">ค้นหางานที่ต้องการ</h4>
+        <p data-i18n="help.step1Body">เลื่อนไปที่ส่วน "คลังภาพ" แล้วพิมพ์ชื่องาน วันที่ หรือแท็กในช่องค้นหา เช่น "กีฬาสี" หรือ "2568"</p>
+      </div>
+    </div>
+    <div class="help-step">
+      <div class="help-step-num">2</div>
+      <div class="help-step-body">
+        <h4 data-i18n="help.step2Title">เปิดดูรูปภาพ</h4>
+        <p data-i18n="help.step2Body">กดปุ่ม "เปิดใน Google Drive" บนการ์ดงานที่ต้องการ ระบบจะพาไปยังโฟลเดอร์ที่เก็บภาพทั้งหมดของงานนั้น</p>
+      </div>
+    </div>
+    <div class="help-step">
+      <div class="help-step-num">3</div>
+      <div class="help-step-body">
+        <h4 data-i18n="help.step3Title">ปรับการแสดงผล</h4>
+        <p data-i18n="help.step3Body">กดปุ่มรูปเฟืองมุมขวาบน เพื่อเปลี่ยนโหมดมืด/สว่าง หรือเลือกโหมดสำหรับผู้ที่ตาบอดสี</p>
+      </div>
+    </div>
+    <div class="help-step">
+      <div class="help-step-num">4</div>
+      <div class="help-step-body">
+        <h4 data-i18n="help.step4Title">เปลี่ยนภาษา</h4>
+        <p data-i18n="help.step4Body">กดปุ่ม TH/EN มุมขวาบน เพื่อสลับภาษาของเมนูและข้อความในเว็บไซต์</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<section id="hero">
+  <div class="aperture-bg">
+    <div class="aperture-blades" aria-hidden="true">
+      <span style="transform:rotate(0deg)"></span>
+      <span style="transform:rotate(60deg)"></span>
+      <span style="transform:rotate(120deg)"></span>
+      <span style="transform:rotate(180deg)"></span>
+      <span style="transform:rotate(240deg)"></span>
+      <span style="transform:rotate(300deg)"></span>
+    </div>
+  </div>
+  <span class="hero-eyebrow">LASALLE SCHOOL · LS PHOTOGRAPHER</span>
+  <h1 class="hero-title">PHOTO<br/><em>GRAPHER</em></h1>
+  <p class="hero-school" data-i18n="hero.school">โรงเรียนลาซาล · กรุงเทพมหานคร</p>
+  <p class="hero-desc" data-i18n="hero.desc">เรียนรู้ศิลปะการถ่ายภาพ พัฒนาทักษะ และบันทึกช่วงเวลาสวยงามในโรงเรียนกับเพื่อนๆ</p>
+  <div class="hero-cta">
+    <a href="#about" class="btn-gold" data-i18n="hero.ctaAbout">รู้จักชมรม</a>
+    <a href="#archive" class="btn-ghost" data-i18n="hero.ctaWork">ดูผลงาน</a>
+  </div>
+  <div class="filmstrip" aria-hidden="true">
+    <div class="film-frame">01</div><div class="film-frame">02</div><div class="film-frame">03</div>
+    <div class="film-frame">04</div><div class="film-frame">05</div><div class="film-frame">06</div>
+    <div class="film-frame">07</div><div class="film-frame">08</div><div class="film-frame">09</div>
+    <div class="film-frame">10</div><div class="film-frame">11</div><div class="film-frame">12</div>
+    <div class="film-frame">13</div><div class="film-frame">14</div><div class="film-frame">15</div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="container">
+    <h2 class="section-title" data-i18n="about.title">ชมรมถ่ายภาพคืออะไร?</h2>
+    <div class="rule"></div>
+
+    <div class="about-layout">
+      <div class="about-copy">
+        <p data-i18n="about.p1">ชมรมถ่ายภาพโรงเรียนลาซาล เป็นพื้นที่สำหรับนักเรียนที่มีใจรักในศิลปะการถ่ายภาพ ทั้งมือใหม่และผู้มีประสบการณ์</p>
+        <p data-i18n="about.p2">ไม่ว่าจะเป็นภาพบุคคล ภาพทิวทัศน์ ภาพสถาปัตยกรรม หรือภาพงานอีเวนต์ ชมรมของเรามีกิจกรรมที่หลากหลายตลอดปีการศึกษา</p>
+        <p data-i18n="about.skillBody">เรียนรู้เทคนิคการถ่ายภาพและตกแต่งภาพ ฝึกทำงานร่วมกับทีม แสดงผลงานในนิทรรศการ และได้เพื่อนที่สนใจเรื่องเดียวกัน</p>
+      </div>
+      <div class="about-facts">
+        <div class="fact"><div class="fact-num">FREE</div><div class="fact-label" data-i18n="about.statFree">ไม่มีค่าใช้จ่าย</div></div>
+        <div class="fact"><div class="fact-num">ม.4–6</div><div class="fact-label" data-i18n="about.statGrade">ระดับชั้น</div></div>
+      </div>
+    </div>
+
+    <div class="about-cta">
+      <p data-i18n="about.ctaBody">ติดตามข่าวรับสมัครรอบถัดไปได้ที่ Instagram ของชมรม</p>
+      <a href="https://www.instagram.com/photographer.lsc" class="btn-ghost" data-i18n="about.ctaBtn">ติดตามข่าวสาร</a>
+    </div>
+  </div>
+</section>
+
+<section id="timeline">
+  <div class="container">
+    <h2 class="section-title" data-i18n="about.timelineTag">กำหนดการรับสมัคร</h2>
+    <div class="rule"></div>
+    <ol class="timeline-list">
+      <li>
+        <span class="timeline-when" data-i18n="about.tl1When">18–26 พ.ค. 2569</span>
+        <span class="timeline-name" data-i18n="about.tl1Name">สมัครเข้าร่วมชมรม (ปิดรับสมัคร)</span>
+      </li>
+      <li>
+        <span class="timeline-when" data-i18n="about.tl2When">แจ้งภายหลัง</span>
+        <span class="timeline-name" data-i18n="about.tl2Name">สัมภาษณ์เข้าร่วมชมรม</span>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section id="categories">
+  <div class="container">
+    <h2 class="section-title" data-i18n="cat.title">ประเภทภาพที่เราถ่าย</h2>
+    <div class="rule"></div>
+    <div class="cat-grid">
+      <div class="cat-card"><span class="cat-icon">🎭</span><div class="cat-title">Portrait</div><p class="cat-desc" data-i18n="cat.portrait">ภาพบุคคล จับอารมณ์และบุคลิกภาพ ทั้งในสตูดิโอและกลางแจ้ง</p></div>
+      <div class="cat-card"><span class="cat-icon">🏛️</span><div class="cat-title">Architecture</div><p class="cat-desc" data-i18n="cat.architecture">ภาพสถาปัตยกรรม มุมมองเรขาคณิต และพื้นที่รอบโรงเรียน</p></div>
+      <div class="cat-card"><span class="cat-icon">🌿</span><div class="cat-title">Nature</div><p class="cat-desc" data-i18n="cat.nature">ภาพธรรมชาติ แสงธรรมชาติ และโลกจิ๋วผ่านมุมมองมาโคร</p></div>
+      <div class="cat-card"><span class="cat-icon">📸</span><div class="cat-title">Street & Event</div><p class="cat-desc" data-i18n="cat.street">ภาพกิจกรรม งานโรงเรียน และ Street Photography ในชีวิตประจำวัน</p></div>
+      <div class="cat-card"><span class="cat-icon">🎨</span><div class="cat-title">Creative</div><p class="cat-desc" data-i18n="cat.creative">ภาพสร้างสรรค์ long exposure, ซิลูเอต และการทดลองเทคนิคพิเศษ</p></div>
+      <div class="cat-card"><span class="cat-icon">✏️</span><div class="cat-title">Editing</div><p class="cat-desc" data-i18n="cat.editing">เรียนรู้การตกแต่งภาพด้วยโปรแกรมแต่งภาพ เช่น Lightroom</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="archive">
+  <div class="container">
+    <h2 class="section-title" data-i18n="archive.title">คลังภาพจากงานต่างๆ</h2>
+    <p class="section-subtitle" data-i18n="archive.subtitle">ค้นหางานจากชื่อ วันที่ หรือแท็ก แล้วคลิกเปิดดูภาพทั้งหมดบน Google Drive ได้เลย</p>
+    <div class="rule"></div>
+
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="archive.searchPlaceholder" placeholder="ค้นหางาน วันที่ หรือแท็ก... (เช่น กีฬาสี, 2568, ปัจฉิม)">
+      </div>
+      <span class="search-meta" id="resultMeta"></span>
+    </div>
+
+    <div id="featuredSection">
+      <div class="featured-label" data-i18n="archive.featured">ผลงานตัวอย่าง</div>
+      <div class="events-grid" id="featuredGrid"></div>
+    </div>
+
+    <div id="allEventsSection" style="display:none">
+      <div class="all-events-label" data-i18n="archive.results">ผลการค้นหา</div>
+      <div class="results-list" id="resultsList"></div>
+    </div>
+
+    <div class="empty-state" id="emptyState" style="display:none">
+      <p id="emptyMsg">ไม่พบงานที่ตรงกับ "<span id="emptyQuery"></span>"</p>
+      <div class="hint" data-i18n="archive.emptyHint">ลองค้นหาด้วยคำอื่น เช่น ชื่องาน ปี พ.ศ. หรือประเภทกิจกรรม</div>
+    </div>
+
+    <div class="empty-state" id="loadingState">
+      <p data-i18n="archive.loading">กำลังโหลดข้อมูลงาน...</p>
+    </div>
+
+    <div class="empty-state" id="errorState" style="display:none">
+      <p data-i18n="archive.errorTitle">ไม่สามารถโหลดข้อมูลได้ในขณะนี้</p>
+      <div class="hint" id="errorDetail">กรุณาลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลเว็บไซต์</div>
+    </div>
+  </div>
+</section>
+
+<section id="location">
+  <div class="container">
+    <h2 class="section-title" data-i18n="loc.title">ที่ตั้งโรงเรียน</h2>
+    <div class="rule"></div>
+    <div class="location-grid">
+      <div class="loc-info">
+        <h3 data-i18n="loc.schoolName">โรงเรียนลาซาล</h3>
+        <p data-i18n="loc.address">949 ถนนสุขุมวิท 105 (ลาซาล) แขวงบางนา เขตบางนา กรุงเทพมหานคร 10260</p>
+        <h3 data-i18n="loc.travelTitle">การเดินทาง</h3>
+        <p data-i18n="loc.travelBody">BTS เเบริ่ง — ต่อรถสองแถวหรือมอเตอร์ไซค์รับจ้าง<br/>รถสองแถวบางนา–ลาซาล<br/>รถยนต์ส่วนตัว ขาออก บางนาตราด เข้าซอยฝ้ายคํา</p>
+      </div>
+      <div class="map-wrap">
+        <iframe src="https://maps.google.com/maps?width=100%25&height=400&hl=th&q=โรงเรียนลาซาล+บางนา+กรุงเทพ&t=&z=15&ie=UTF8&iwloc=B&output=embed" title="แผนที่โรงเรียนลาซาล" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faqs">
+  <div class="container">
+    <h2 class="section-title" data-i18n="faq.title">คำถามที่พบบ่อย</h2>
+    <div class="rule"></div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q1">ต้องมีกล้องเป็นของตัวเองไหมถึงจะเข้าร่วมชมรมได้?</span> <span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p data-i18n="faq.a1">ไม่จำเป็นต้องมีกล้องก็สามารถสมัครได้ ทางชมรมมีกล้องให้ยืมขณะทำกิจกรรม</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q2">นักเรียนชั้นไหนสมัครได้บ้าง?</span> <span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p data-i18n="faq.a2">นักเรียนระดับชั้น ม.4 - ม.6 สามารถสมัครเข้าร่วมชมรมได้ ไม่จำกัดพื้นฐานหรือประสบการณ์</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q3">ชมรมมีประชุมวันไหน เวลาใด?</span> <span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p data-i18n="faq.a3">ประชุมก่อนมีกิจกรรมทุกครั้ง เวลา 20.00 น. เป็นต้นไป</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q4">สมัครได้ที่ไหน?</span> <span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p data-i18n="faq.a4">สมัครได้ทางฟอร์มออนไลน์ที่จะแจ้งในช่วงต้นปีการศึกษา หรือติดต่อครูที่ปรึกษาชมรมโดยตรง และติดตามข่าวสารผ่าน Instagram ของชมรม</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span data-i18n="faq.q5">ผลงานในชมรมนำไปใช้ต่อได้ไหม?</span> <span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p data-i18n="faq.a5">ได้เลย สมาชิกมีสิทธิ์ในภาพถ่ายของตนเอง สามารถนำไปสมัครประกวด ลงพอร์ตโฟลิโอ หรือใช้ต่อยอดในอนาคตได้ทุกช่องทาง</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3 data-i18n="footer.brand">ชมรมถ่ายภาพ ลาซาล</h3>
+      <p data-i18n="footer.brandBody">โรงเรียนลาซาล บางนา กรุงเทพมหานคร<br/>จัดตั้งและดำเนินการโดยนักเรียน<br/>ภายใต้การดูแลของครูที่ปรึกษาชมรม</p>
+      <div class="email">Email : photographer@lasalleschool.ac.th</div>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.sections">SECTIONS</h4>
+      <ul>
+        <li><a href="#about" data-i18n="nav.about">เกี่ยวกับเรา</a></li>
+        <li><a href="#categories" data-i18n="nav.categories">ประเภทภาพ</a></li>
+        <li><a href="#archive" data-i18n="nav.archive">คลังภาพ</a></li>
+        <li><a href="#faqs" data-i18n="nav.faqs">FAQs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.contact">CONTACT US</h4>
+      <ul>
+        <li><a href="https://www.instagram.com/photographer.lsc?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="blank">Instagram : photographer.lsc</a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=100088554210023&locale=th_TH" target="blank">Facebook : LSC Photographer</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span data-i18n="footer.copyright">© 2569 ชมรมถ่ายภาพ โรงเรียนลาซาล</span>
+    <span data-i18n="footer.joinSoon">สมัครสมาชิก — เปิดรับเร็ว ๆ นี้</span>
+  </div>
+</footer>
+
+<!-- ===================== CHATBOT WIDGET ===================== -->
+<button class="chat-fab" id="chatFab" aria-label="เปิดแชทถามตอบ" aria-expanded="false">
+  <svg class="chat-fab-chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+  <svg class="chat-fab-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  <span class="unread-dot" id="chatUnreadDot"></span>
+</button>
+
+<div class="chat-box" id="chatBox" role="dialog" aria-modal="false" aria-labelledby="chatBoxTitle">
+  <div class="chat-header">
+    <div class="chat-header-icon">📷</div>
+    <div class="chat-header-text">
+      <h4 id="chatBoxTitle" data-i18n="chat.title">ผู้ช่วยชมรมถ่ายภาพ</h4>
+      <span data-i18n="chat.online">พร้อมตอบคำถาม</span>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chatMessages"></div>
+
+  <div class="chat-suggestions" id="chatSuggestions"></div>
+
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chatInput" rows="1" data-i18n-placeholder="chat.inputPlaceholder" placeholder="พิมพ์คำถามของคุณ..."></textarea>
+    <button class="chat-send-btn" id="chatSendBtn" aria-label="ส่งข้อความ">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+  <div class="chat-disclaimer" data-i18n="chat.disclaimer">คำตอบสร้างโดย AI อาจมีข้อผิดพลาดได้</div>
+</div>
+
+<script>
+// FAQ
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.closest('.faq-item');
+    const wasOpen=item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));
+    if(!wasOpen)item.classList.add('open');
+  });
+});
+
+// Hamburger
+const hamburger=document.getElementById('hamburger');
+const navMenu=document.getElementById('nav-menu');
+const navLinks=document.querySelectorAll('.nav-links a, .nav-join');
+hamburger.addEventListener('click',()=>{hamburger.classList.toggle('active');navMenu.classList.toggle('active');});
+navLinks.forEach(link=>{link.addEventListener('click',()=>{hamburger.classList.remove('active');navMenu.classList.remove('active');});});
+
+// ===================== PREFERENCES (theme + color-vision mode) =====================
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const themeOpts = document.querySelectorAll('[data-theme-opt]');
+const cvdOpts = document.querySelectorAll('[data-cvd-opt]');
+
+function getSavedTheme(){ try{ return localStorage.getItem('lsc_theme') || 'dark'; }catch(e){ return 'dark'; } }
+function getSavedCvd(){ try{ return localStorage.getItem('lsc_cvd') || 'none'; }catch(e){ return 'none'; } }
+
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  try{ localStorage.setItem('lsc_theme', theme); }catch(e){}
+  themeOpts.forEach(btn => btn.classList.toggle('active', btn.dataset.themeOpt === theme));
+}
+
+function applyCvd(cvd){
+  if(cvd === 'none'){
+    document.documentElement.removeAttribute('data-cvd');
+  }else{
+    document.documentElement.setAttribute('data-cvd', cvd);
+  }
+  try{ localStorage.setItem('lsc_cvd', cvd); }catch(e){}
+  cvdOpts.forEach(btn => btn.classList.toggle('active', btn.dataset.cvdOpt === cvd));
+}
+
+// ตั้งค่าเริ่มต้นตามที่บันทึกไว้ (หรือค่า default) แล้วอัปเดตปุ่มให้ตรงสถานะ
+applyTheme(getSavedTheme());
+applyCvd(getSavedCvd());
+
+settingsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = settingsPanel.classList.toggle('open');
+  settingsBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+});
+
+document.addEventListener('click', (e) => {
+  if(!settingsPanel.contains(e.target) && e.target !== settingsBtn){
+    settingsPanel.classList.remove('open');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+themeOpts.forEach(btn => btn.addEventListener('click', () => applyTheme(btn.dataset.themeOpt)));
+cvdOpts.forEach(btn => btn.addEventListener('click', () => applyCvd(btn.dataset.cvdOpt)));
+
+// ===================== SHARED STATE (ประกาศก่อน i18n เพื่อไม่ให้เกิด TDZ error ตอน applyLang เรียก render ครั้งแรก) =====================
+let allEvents = [];
+let searchQuery = "";
+
+// ===================== I18N (ไทย / อังกฤษ) =====================
+// แปลเฉพาะข้อความของหน้าเว็บ (เมนู, ปุ่ม, ป้าย, คู่มือ) — ชื่องาน/คำอธิบายจาก Google Sheet ไม่แปล
+const I18N = {
+  th: {
+    "nav.brand": "ชมรมถ่ายภาพโรงเรียนลาซาล",
+    "nav.about": "เกี่ยวกับเรา",
+    "nav.categories": "ประเภทภาพ",
+    "nav.archive": "คลังภาพ",
+    "nav.faqs": "FAQs",
+    "nav.join": "สมัครสมาชิก",
+    "help.menuLabel": "วิธีใช้เว็บไซต์",
+    "prefs.colorMode": "โหมดสี",
+    "prefs.langLabel": "ภาษา",
+    "prefs.dark": "มืด",
+    "prefs.light": "สว่าง",
+    "prefs.cvdLabel": "สำหรับผู้ที่ตาบอดสี",
+    "prefs.cvdNone": "ปกติ",
+    "prefs.cvdPro": "Protanopia (ตาบอดสีแดง)",
+    "prefs.cvdDeu": "Deuteranopia (ตาบอดสีเขียว)",
+    "prefs.cvdTri": "Tritanopia (ตาบอดสีน้ำเงิน)",
+    "help.title": "วิธีใช้เว็บไซต์",
+    "help.step1Title": "ค้นหางานที่ต้องการ",
+    "help.step1Body": "เลื่อนไปที่ส่วน \"คลังภาพ\" แล้วพิมพ์ชื่องาน วันที่ หรือแท็กในช่องค้นหา เช่น \"กีฬาสี\" หรือ \"2568\"",
+    "help.step2Title": "เปิดดูรูปภาพ",
+    "help.step2Body": "กดปุ่ม \"เปิดใน Google Drive\" บนการ์ดงานที่ต้องการ ระบบจะพาไปยังโฟลเดอร์ที่เก็บภาพทั้งหมดของงานนั้น",
+    "help.step3Title": "ปรับการแสดงผล",
+    "help.step3Body": "กดปุ่มรูปเฟืองมุมขวาบน เพื่อเปลี่ยนโหมดมืด/สว่าง หรือเลือกโหมดสำหรับผู้ที่ตาบอดสี",
+    "help.step4Title": "เปลี่ยนภาษา",
+    "help.step4Body": "กดปุ่ม TH/EN มุมขวาบน เพื่อสลับภาษาของเมนูและข้อความในเว็บไซต์",
+    "hero.school": "โรงเรียนลาซาล · กรุงเทพมหานคร",
+    "hero.desc": "เรียนรู้ศิลปะการถ่ายภาพ พัฒนาทักษะ และบันทึกช่วงเวลาสวยงามในโรงเรียนกับเพื่อนๆ",
+    "hero.ctaAbout": "รู้จักชมรม",
+    "hero.ctaWork": "ดูผลงาน",
+    "about.label": "// 01 — ABOUT",
+    "about.title": "ชมรมถ่ายภาพคืออะไร?",
+    "about.p1": "ชมรมถ่ายภาพโรงเรียนลาซาล เป็นพื้นที่สำหรับนักเรียนที่มีใจรักในศิลปะการถ่ายภาพ ทั้งมือใหม่และผู้มีประสบการณ์",
+    "about.p2": "ไม่ว่าจะเป็นภาพบุคคล ภาพทิวทัศน์ ภาพสถาปัตยกรรม หรือภาพงานอีเวนต์ ชมรมของเรามีกิจกรรมที่หลากหลายตลอดปีการศึกษา",
+    "about.statFree": "ไม่มีค่าใช้จ่าย",
+    "about.statGrade": "ระดับชั้น",
+    "about.skillTag": "สิ่งที่จะได้รับ",
+    "about.skillBody": "เรียนรู้เทคนิคการถ่ายภาพและตกแต่งภาพ ฝึกทำงานร่วมกับทีม แสดงผลงานในนิทรรศการ และได้เพื่อนที่สนใจเรื่องเดียวกัน",
+    "about.timelineTag": "// 02 — กำหนดการรับสมัคร",
+    "about.tl1When": "18–26 พ.ค. 2569",
+    "about.tl1Name": "สมัครเข้าร่วมชมรม (ปิดรับสมัคร)",
+    "about.tl2When": "แจ้งภายหลัง",
+    "about.tl2Name": "สัมภาษณ์เข้าร่วมชมรม",
+    "about.ctaBody": "ติดตามข่าวรับสมัครรอบถัดไปได้ที่ Instagram ของชมรม",
+    "about.ctaBtn": "ติดตามข่าวสาร",
+    "cat.label": "// 03 — CATEGORIES",
+    "cat.title": "ประเภทภาพที่เราถ่าย",
+    "cat.portrait": "ภาพบุคคล จับอารมณ์และบุคลิกภาพ ทั้งในสตูดิโอและกลางแจ้ง",
+    "cat.architecture": "ภาพสถาปัตยกรรม มุมมองเรขาคณิต และพื้นที่รอบโรงเรียน",
+    "cat.nature": "ภาพธรรมชาติ แสงธรรมชาติ และโลกจิ๋วผ่านมุมมองมาโคร",
+    "cat.street": "ภาพกิจกรรม งานโรงเรียน และ Street Photography ในชีวิตประจำวัน",
+    "cat.creative": "ภาพสร้างสรรค์ long exposure, ซิลูเอต และการทดลองเทคนิคพิเศษ",
+    "cat.editing": "เรียนรู้การตกแต่งภาพด้วยโปรแกรมแต่งภาพ เช่น Lightroom",
+    "archive.label": "// 04 — ARCHIVE",
+    "archive.title": "คลังภาพจากงานต่างๆ",
+    "archive.subtitle": "ค้นหางานจากชื่อ วันที่ หรือแท็ก แล้วคลิกเปิดดูภาพทั้งหมดบน Google Drive ได้เลย",
+    "archive.searchPlaceholder": "ค้นหางาน วันที่ หรือแท็ก... (เช่น กีฬาสี, 2568, ปัจฉิม)",
+    "archive.featured": "ผลงานตัวอย่าง",
+    "archive.results": "ผลการค้นหา",
+    "archive.emptyPrefix": "ไม่พบงานที่ตรงกับ \"",
+    "archive.emptySuffix": "\"",
+    "archive.emptyHint": "ลองค้นหาด้วยคำอื่น เช่น ชื่องาน ปี พ.ศ. หรือประเภทกิจกรรม",
+    "archive.loading": "กำลังโหลดข้อมูลงาน...",
+    "archive.errorTitle": "ไม่สามารถโหลดข้อมูลได้ในขณะนี้",
+    "archive.driveBtn": "เปิดใน Google Drive",
+    "archive.viewBtn": "ดูภาพ",
+    "archive.photoUnit": "รูป",
+    "loc.label": "// 05 — LOCATION",
+    "loc.title": "ที่ตั้งโรงเรียน",
+    "loc.schoolName": "โรงเรียนลาซาล",
+    "loc.address": "949 ถนนสุขุมวิท 105 (ลาซาล) แขวงบางนา เขตบางนา กรุงเทพมหานคร 10260",
+    "loc.travelTitle": "การเดินทาง",
+    "loc.travelBody": "BTS เเบริ่ง — ต่อรถสองแถวหรือมอเตอร์ไซค์รับจ้าง<br/>รถสองแถวบางนา–ลาซาล<br/>รถยนต์ส่วนตัว ขาออก บางนาตราด เข้าซอยฝ้ายคํา",
+    "faq.label": "// 06 — FAQs",
+    "faq.title": "คำถามที่พบบ่อย",
+    "faq.q1": "ต้องมีกล้องเป็นของตัวเองไหมถึงจะเข้าร่วมชมรมได้?",
+    "faq.a1": "ไม่จำเป็นต้องมีกล้องก็สามารถสมัครได้ ทางชมรมมีกล้องให้ยืมขณะทำกิจกรรม",
+    "faq.q2": "นักเรียนชั้นไหนสมัครได้บ้าง?",
+    "faq.a2": "นักเรียนระดับชั้น ม.4 - ม.6 สามารถสมัครเข้าร่วมชมรมได้ ไม่จำกัดพื้นฐานหรือประสบการณ์",
+    "faq.q3": "ชมรมมีประชุมวันไหน เวลาใด?",
+    "faq.a3": "ประชุมก่อนมีกิจกรรมทุกครั้ง เวลา 20.00 น. เป็นต้นไป",
+    "faq.q4": "สมัครได้ที่ไหน?",
+    "faq.a4": "สมัครได้ทางฟอร์มออนไลน์ที่จะแจ้งในช่วงต้นปีการศึกษา หรือติดต่อครูที่ปรึกษาชมรมโดยตรง และติดตามข่าวสารผ่าน Instagram ของชมรม",
+    "faq.q5": "ผลงานในชมรมนำไปใช้ต่อได้ไหม?",
+    "faq.a5": "ได้เลย สมาชิกมีสิทธิ์ในภาพถ่ายของตนเอง สามารถนำไปสมัครประกวด ลงพอร์ตโฟลิโอ หรือใช้ต่อยอดในอนาคตได้ทุกช่องทาง",
+    "footer.brand": "ชมรมถ่ายภาพ ลาซาล",
+    "footer.brandBody": "โรงเรียนลาซาล บางนา กรุงเทพมหานคร<br/>จัดตั้งและดำเนินการโดยนักเรียน<br/>ภายใต้การดูแลของครูที่ปรึกษาชมรม",
+    "footer.sections": "SECTIONS",
+    "footer.contact": "CONTACT US",
+    "footer.copyright": "© 2569 ชมรมถ่ายภาพ โรงเรียนลาซาล",
+    "footer.joinSoon": "สมัครสมาชิก — เปิดรับเร็ว ๆ นี้",
+    "chat.title": "ผู้ช่วยชมรมถ่ายภาพ",
+    "chat.online": "พร้อมตอบคำถาม",
+    "chat.inputPlaceholder": "พิมพ์คำถามของคุณ...",
+    "chat.disclaimer": "คำตอบสร้างโดย AI อาจมีข้อผิดพลาดได้",
+    "chat.greeting": "สวัสดีครับ! ผมเป็นผู้ช่วยตอบคำถามเกี่ยวกับชมรมถ่ายภาพโรงเรียนลาซาล มีอะไรให้ช่วยไหมครับ?",
+    "chat.suggestion1": "ต้องมีกล้องเองไหม?",
+    "chat.suggestion2": "สมัครได้ที่ไหน?",
+    "chat.suggestion3": "ค้นหารูปยังไง?",
+    "chat.errorGeneric": "ขออภัยครับ ตอนนี้ผู้ช่วยขัดข้องชั่วคราว ลองใหม่อีกครั้ง หรือติดต่อครูที่ปรึกษาชมรมโดยตรงนะครับ",
+    "chat.errorConfig": "แชทบอทยังไม่พร้อมใช้งาน (ยังไม่ได้ตั้งค่า backend) กรุณาติดต่อผู้ดูแลเว็บไซต์"
+  },
+  en: {
+    "nav.brand": "Lasalle School Photography Club",
+    "nav.about": "About",
+    "nav.categories": "Categories",
+    "nav.archive": "Archive",
+    "nav.faqs": "FAQs",
+    "nav.join": "Join Us",
+    "help.menuLabel": "How to use this site",
+    "prefs.colorMode": "Color mode",
+    "prefs.langLabel": "Language",
+    "prefs.dark": "Dark",
+    "prefs.light": "Light",
+    "prefs.cvdLabel": "For colorblind users",
+    "prefs.cvdNone": "Normal",
+    "prefs.cvdPro": "Protanopia (red-blind)",
+    "prefs.cvdDeu": "Deuteranopia (green-blind)",
+    "prefs.cvdTri": "Tritanopia (blue-blind)",
+    "help.title": "How to use this site",
+    "help.step1Title": "Search for an event",
+    "help.step1Body": "Scroll to the \"Archive\" section and type an event name, date, or tag into the search box, e.g. \"sports day\" or \"2025\"",
+    "help.step2Title": "Open the photos",
+    "help.step2Body": "Click \"Open in Google Drive\" on the event card you want. You'll be taken to the folder with all the photos from that event",
+    "help.step3Title": "Adjust display settings",
+    "help.step3Body": "Click the gear icon in the top-right to switch between dark/light mode, or choose a colorblind-friendly mode",
+    "help.step4Title": "Change language",
+    "help.step4Body": "Click the TH/EN button in the top-right to switch the site's menu and text between Thai and English",
+    "hero.school": "Lasalle School · Bangkok",
+    "hero.desc": "Learn the art of photography, build your skills, and capture beautiful moments at school with friends",
+    "hero.ctaAbout": "About the club",
+    "hero.ctaWork": "See our work",
+    "about.label": "// 01 — ABOUT",
+    "about.title": "What is the Photography Club?",
+    "about.p1": "The Lasalle School Photography Club is a space for students who love the art of photography, whether beginners or experienced.",
+    "about.p2": "From portraits to landscapes, architecture to event coverage, the club runs a variety of activities all year round.",
+    "about.statFree": "No cost to join",
+    "about.statGrade": "Grade levels",
+    "about.skillTag": "What you'll get",
+    "about.skillBody": "Learn photography and editing techniques, practice teamwork, showcase your work in exhibitions, and make friends who share your interests.",
+    "about.timelineTag": "// 02 — Application timeline",
+    "about.tl1When": "May 18–26, 2026",
+    "about.tl1Name": "Club applications (currently closed)",
+    "about.tl2When": "TBA",
+    "about.tl2Name": "Club interviews",
+    "about.ctaBody": "Follow the club's Instagram for news on the next application round",
+    "about.ctaBtn": "Follow for updates",
+    "cat.label": "// 03 — CATEGORIES",
+    "cat.title": "What we shoot",
+    "cat.portrait": "Portraits that capture mood and personality, in studio and outdoors",
+    "cat.architecture": "Architectural photography, geometric perspectives, and spaces around campus",
+    "cat.nature": "Nature photography, natural light, and macro views of small worlds",
+    "cat.street": "Event coverage, school activities, and everyday street photography",
+    "cat.creative": "Creative work: long exposure, silhouettes, and experimental techniques",
+    "cat.editing": "Learn photo editing software such as Lightroom",
+    "archive.label": "// 04 — ARCHIVE",
+    "archive.title": "Photo archive by event",
+    "archive.subtitle": "Search by event name, date, or tag, then click through to view all photos on Google Drive",
+    "archive.searchPlaceholder": "Search by event, date, or tag... (e.g. sports day, 2025)",
+    "archive.featured": "Featured work",
+    "archive.results": "Search results",
+    "archive.emptyPrefix": "No events matched \"",
+    "archive.emptySuffix": "\"",
+    "archive.emptyHint": "Try a different search term, such as an event name, year, or activity type",
+    "archive.loading": "Loading events...",
+    "archive.errorTitle": "Couldn't load events right now",
+    "archive.driveBtn": "Open in Google Drive",
+    "archive.viewBtn": "View",
+    "archive.photoUnit": "photos",
+    "loc.label": "// 05 — LOCATION",
+    "loc.title": "Campus location",
+    "loc.schoolName": "Lasalle School",
+    "loc.address": "949 Sukhumvit 105 (Lasalle) Road, Bang Na, Bang Na, Bangkok 10260",
+    "loc.travelTitle": "Getting here",
+    "loc.travelBody": "BTS Bearing — connect via songthaew or motorcycle taxi<br/>Bang Na–Lasalle songthaew route<br/>By car: from Bang Na Trad, turn into Soi Fai Kham",
+    "faq.label": "// 06 — FAQs",
+    "faq.title": "Frequently asked questions",
+    "faq.q1": "Do I need my own camera to join?",
+    "faq.a1": "No, you don't need one. The club has cameras you can borrow during activities.",
+    "faq.q2": "Which grade levels can join?",
+    "faq.a2": "Students in Grades 10–12 (M.4–M.6) can join. No prior experience needed.",
+    "faq.q3": "When does the club meet?",
+    "faq.a3": "We meet before every activity, starting at 8:00 PM.",
+    "faq.q4": "Where do I apply?",
+    "faq.a4": "Apply through the online form announced at the start of the school year, or contact the club's advisor teacher directly. Follow the club's Instagram for updates.",
+    "faq.q5": "Can I use my own photos from the club elsewhere?",
+    "faq.a5": "Yes. Members retain rights to their own photos and can use them for contests, portfolios, or anything else.",
+    "footer.brand": "Lasalle Photography Club",
+    "footer.brandBody": "Lasalle School, Bang Na, Bangkok<br/>Run by students<br/>Under the supervision of the club's advisor teacher",
+    "footer.sections": "SECTIONS",
+    "footer.contact": "CONTACT US",
+    "footer.copyright": "© 2026 Lasalle School Photography Club",
+    "footer.joinSoon": "Membership — opening soon",
+    "chat.title": "Photo Club Assistant",
+    "chat.online": "Ready to help",
+    "chat.inputPlaceholder": "Type your question...",
+    "chat.disclaimer": "Answers are AI-generated and may contain errors",
+    "chat.greeting": "Hi! I'm here to answer questions about the Lasalle School Photography Club. How can I help?",
+    "chat.suggestion1": "Do I need my own camera?",
+    "chat.suggestion2": "Where do I apply?",
+    "chat.suggestion3": "How do I search for photos?",
+    "chat.errorGeneric": "Sorry, the assistant is temporarily unavailable. Please try again or contact the club's advisor teacher directly.",
+    "chat.errorConfig": "The chatbot isn't set up yet (backend not configured). Please contact the site administrator."
+  }
+};
+
+function getSavedLang(){ try{ return localStorage.getItem('lsc_lang') || 'th'; }catch(e){ return 'th'; } }
+
+function applyLang(lang){
+  const dict = I18N[lang] || I18N.th;
+  document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'th');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if(dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria');
+    if(dict[key] !== undefined) el.setAttribute('aria-label', dict[key]);
+  });
+  document.querySelectorAll('[data-lang-opt]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.langOpt === lang);
+  });
+  try{ localStorage.setItem('lsc_lang', lang); }catch(e){}
+  window.currentLang = lang;
+  // เรนเดอร์การ์ดงานใหม่ เพื่ออัปเดตข้อความปุ่ม/หน่วยรูปที่ต้องแปล
+  if(typeof renderFeatured === 'function') renderFeatured();
+  if(typeof renderSearch === 'function') renderSearch();
+}
+
+document.querySelectorAll('[data-lang-opt]').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.dataset.langOpt));
+});
+
+applyLang(getSavedLang());
+
+// ===================== HELP MODAL =====================
+const helpBtn = document.getElementById('helpBtn');
+const helpModal = document.getElementById('helpModal');
+const helpModalClose = document.getElementById('helpModalClose');
+const helpModalBackdrop = document.getElementById('helpModalBackdrop');
+
+function openHelpModal(){
+  settingsPanel.classList.remove('open');
+  settingsBtn.setAttribute('aria-expanded', 'false');
+  helpModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeHelpModal(){
+  helpModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+helpBtn.addEventListener('click', openHelpModal);
+helpModalClose.addEventListener('click', closeHelpModal);
+helpModalBackdrop.addEventListener('click', closeHelpModal);
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && helpModal.classList.contains('open')) closeHelpModal();
+});
+
+// ===================== GOOGLE SHEET CONFIG =====================
+// แก้บรรทัดนี้เป็น URL ของ Apps Script Web App ที่ได้จากขั้นตอนติดตั้ง
+// (ดูวิธีหา URL นี้ใน SETUP-GUIDE.md ขั้นที่ 3)
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxJflsnLZp1gSe_jieGVrBqkiufF5iIQgKxs0oNc4FYg2Ocl-0qVqLYwJBaLpHqr-Hk4g/exec";
+
+async function loadEvents(){
+  const loadingEl = document.getElementById('loadingState');
+  const errorEl = document.getElementById('errorState');
+  loadingEl.style.display = 'block';
+  errorEl.style.display = 'none';
+
+  try{
+    const res = await fetch(SHEET_API_URL);
+    if(!res.ok) throw new Error('เซิร์ฟเวอร์ตอบกลับผิดพลาด (สถานะ ' + res.status + ')');
+
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    allEvents = data.events || [];
+    loadingEl.style.display = 'none';
+    renderFeatured();
+    renderSearch();
+  }catch(err){
+    console.error('โหลดข้อมูลงานไม่สำเร็จ:', err);
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'block';
+    document.getElementById('errorDetail').textContent =
+      SHEET_API_URL.includes('YOUR-DEPLOYMENT-ID')
+        ? 'ยังไม่ได้ตั้งค่า Google Sheet API URL ในไฟล์ index.html'
+        : 'กรุณาลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลเว็บไซต์ (' + err.message + ')';
+  }
+}
+
+function buildEventCard(ev){
+  const card=document.createElement('div');
+  card.className='event-card';
+
+  const preview=document.createElement('div');
+  preview.className='event-preview';
+  const img=document.createElement('img');
+  img.src=ev.thumbnail;
+  img.alt=ev.name;
+  img.loading='lazy';
+  img.addEventListener('error',()=>{
+    img.style.display='none';
+    preview.style.background='linear-gradient(135deg,#150608,#220b0e)';
+  });
+  const badge=document.createElement('div');
+  badge.className='drive-badge';
+  badge.textContent='Google Drive';
+  preview.appendChild(img);
+  preview.appendChild(badge);
+
+  const body=document.createElement('div');
+  body.className='event-body';
+
+  const dateEl=document.createElement('div');
+  dateEl.className='event-date';
+  dateEl.textContent=ev.date;
+
+  const nameEl=document.createElement('div');
+  nameEl.className='event-name';
+  nameEl.textContent=ev.name;
+
+  const descEl=document.createElement('div');
+  descEl.className='event-desc';
+  descEl.textContent=ev.desc;
+
+  const tagsEl=document.createElement('div');
+  tagsEl.className='event-tags';
+  ev.tags.forEach(t=>{
+    const tag=document.createElement('span');
+    tag.className='event-tag';
+    tag.textContent=t;
+    tagsEl.appendChild(tag);
+  });
+  const countTag=document.createElement('span');
+  countTag.className='event-tag';
+  countTag.style.cssText='background:rgba(255,255,255,0.05);color:var(--muted);border-color:var(--border2)';
+  const langNow = I18N[window.currentLang || 'th'];
+  countTag.textContent=ev.photoCount+' '+(langNow['archive.photoUnit'] || 'รูป');
+  tagsEl.appendChild(countTag);
+
+  const actions=document.createElement('div');
+  actions.className='event-actions';
+
+  const driveBtn=document.createElement('a');
+  driveBtn.href=ev.folderUrl;
+  driveBtn.target='_blank';
+  driveBtn.rel='noopener';
+  driveBtn.className='btn-drive';
+  driveBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>'+(langNow['archive.driveBtn'] || 'เปิดใน Google Drive');
+
+  const viewBtn=document.createElement('a');
+  viewBtn.href=ev.folderUrl;
+  viewBtn.target='_blank';
+  viewBtn.rel='noopener';
+  viewBtn.className='btn-ghost-sm';
+  viewBtn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>'+(langNow['archive.viewBtn'] || 'ดูภาพ');
+
+  actions.appendChild(driveBtn);
+  actions.appendChild(viewBtn);
+
+  body.appendChild(dateEl);
+  body.appendChild(nameEl);
+  body.appendChild(descEl);
+  body.appendChild(tagsEl);
+  body.appendChild(actions);
+
+  card.appendChild(preview);
+  card.appendChild(body);
+  return card;
+}
+
+function renderFeatured(){
+  const grid=document.getElementById('featuredGrid');
+  const featured=allEvents.filter(e=>e.featured);
+  grid.innerHTML='';
+  featured.forEach(ev=>grid.appendChild(buildEventCard(ev)));
+}
+
+function renderSearch(){
+  const featuredSec=document.getElementById('featuredSection');
+  const allSec=document.getElementById('allEventsSection');
+  const empty=document.getElementById('emptyState');
+  const list=document.getElementById('resultsList');
+  const meta=document.getElementById('resultMeta');
+  const lang=window.currentLang || 'th';
+  const t=I18N[lang];
+  const isEn = lang === 'en';
+
+  if(!searchQuery){
+    const hasFeatured = allEvents.some(e=>e.featured);
+    featuredSec.style.display = hasFeatured ? 'block' : 'none';
+    allSec.style.display='none';
+    empty.style.display='none';
+    meta.textContent = allEvents.length
+      ? (isEn ? 'Type to search '+allEvents.length+' events' : 'พิมพ์คำค้นหาเพื่อค้นหาจาก '+allEvents.length+' งาน')
+      : (isEn ? 'No events yet' : 'ยังไม่มีข้อมูลงานในระบบ');
+    return;
+  }
+
+  const q=searchQuery.toLowerCase();
+  const filtered=allEvents.filter(ev=>ev.name.toLowerCase().includes(q)||ev.date.toLowerCase().includes(q)||ev.desc.toLowerCase().includes(q)||ev.tags.some(t=>t.toLowerCase().includes(q)));
+
+  meta.textContent = isEn ? filtered.length+' events found' : 'พบ '+filtered.length+' งานจากการค้นหา';
+
+  if(filtered.length===0){
+    featuredSec.style.display='none';
+    allSec.style.display='none';
+    empty.style.display='block';
+    // rebuild ข้อความด้วย DOM methods (ไม่ใช่ innerHTML) เพื่อไม่ให้ค่าค้นหาของผู้ใช้ถูกตีความเป็น HTML
+    // และเพื่อให้ยังคง <span id="emptyQuery"> อยู่ได้ทุกครั้งที่ภาษาเปลี่ยนหรือค้นหาใหม่
+    const emptyMsg = document.getElementById('emptyMsg');
+    emptyMsg.textContent = '';
+    emptyMsg.appendChild(document.createTextNode(t['archive.emptyPrefix'] || ''));
+    const querySpan = document.createElement('span');
+    querySpan.id = 'emptyQuery';
+    querySpan.textContent = searchQuery;
+    emptyMsg.appendChild(querySpan);
+    emptyMsg.appendChild(document.createTextNode(t['archive.emptySuffix'] || ''));
+    return;
+  }
+
+  featuredSec.style.display='none';
+  allSec.style.display='block';
+  empty.style.display='none';
+  list.innerHTML='';
+
+  filtered.forEach(ev=>{
+    const item=document.createElement('a');
+    item.className='result-item';
+    item.href=ev.folderUrl;
+    item.target='_blank';
+    item.rel='noopener';
+
+    const dateEl=document.createElement('div');
+    dateEl.className='result-date';
+    dateEl.textContent=ev.date;
+
+    const info=document.createElement('div');
+    info.className='result-info';
+    const nameEl=document.createElement('div');
+    nameEl.className='result-name';
+    nameEl.textContent=ev.name;
+    const metaEl=document.createElement('div');
+    metaEl.className='result-meta';
+    metaEl.textContent=ev.desc+' · '+ev.photoCount+' '+(t['archive.photoUnit']||'รูป')+' · '+ev.tags.join(', ');
+    info.appendChild(nameEl);
+    info.appendChild(metaEl);
+
+    const arrow=document.createElement('div');
+    arrow.className='result-arrow';
+    arrow.textContent='→';
+
+    item.appendChild(dateEl);
+    item.appendChild(info);
+    item.appendChild(arrow);
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input',(e)=>{
+  searchQuery=e.target.value.trim();
+  renderSearch();
+});
+
+loadEvents();
+
+// ===================== CHATBOT WIDGET =====================
+// แก้บรรทัดนี้เป็น URL ของ Apps Script Web App ของ chatbot (deploy แยกจาก Sheet API)
+// (ดูวิธีหา URL นี้ใน CHATBOT-SETUP-GUIDE.md)
+const CHATBOT_API_URL = "https://script.google.com/macros/s/AKfycbyI0hL3adK095gnoF7YNkO-nWxJvYtiPECaOIJEVHE2jN8lXhDvzA3mIIgqyYTD6OwC/exec";
+
+const chatFab = document.getElementById('chatFab');
+const chatBox = document.getElementById('chatBox');
+const chatMessages = document.getElementById('chatMessages');
+const chatSuggestions = document.getElementById('chatSuggestions');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const chatUnreadDot = document.getElementById('chatUnreadDot');
+
+let chatHistory = []; // เก็บบทสนทนาในเซสชันนี้ (ไม่บันทึกถาวร หายเมื่อรีเฟรชหน้า)
+let chatOpened = false;
+let chatIsSending = false;
+
+function scrollChatToBottom(){
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function appendChatMessage(text, role){
+  // role: 'bot' | 'user' | 'error'
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + role;
+  msg.textContent = text;
+  chatMessages.appendChild(msg);
+  scrollChatToBottom();
+  return msg;
+}
+
+function showTypingIndicator(){
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot typing';
+  typing.id = 'chatTypingIndicator';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  chatMessages.appendChild(typing);
+  scrollChatToBottom();
+}
+
+function removeTypingIndicator(){
+  const el = document.getElementById('chatTypingIndicator');
+  if(el) el.remove();
+}
+
+function renderChatSuggestions(){
+  const t = I18N[window.currentLang || 'th'];
+  const suggestions = [t['chat.suggestion1'], t['chat.suggestion2'], t['chat.suggestion3']];
+  chatSuggestions.innerHTML = '';
+  suggestions.forEach(text => {
+    const btn = document.createElement('button');
+    btn.className = 'chat-suggestion-btn';
+    btn.textContent = text;
+    btn.addEventListener('click', () => {
+      chatInput.value = text;
+      sendChatMessage();
+    });
+    chatSuggestions.appendChild(btn);
+  });
+}
+
+function initChatGreeting(){
+  if(chatMessages.children.length === 0){
+    const t = I18N[window.currentLang || 'th'];
+    appendChatMessage(t['chat.greeting'], 'bot');
+    renderChatSuggestions();
+  }
+}
+
+function toggleChatBox(){
+  chatOpened = !chatOpened;
+  chatBox.classList.toggle('open', chatOpened);
+  chatFab.classList.toggle('open', chatOpened);
+  chatFab.setAttribute('aria-expanded', chatOpened ? 'true' : 'false');
+  if(chatOpened){
+    chatUnreadDot.classList.remove('show');
+    initChatGreeting();
+    chatInput.focus();
+  }
+}
+
+chatFab.addEventListener('click', toggleChatBox);
+
+async function sendChatMessage(){
+  const question = chatInput.value.trim();
+  if(!question || chatIsSending) return;
+
+  // ซ่อนคำแนะนำหลังจากเริ่มคุยจริงแล้ว
+  chatSuggestions.innerHTML = '';
+
+  appendChatMessage(question, 'user');
+  chatHistory.push({ role: 'user', text: question });
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+
+  chatIsSending = true;
+  chatSendBtn.disabled = true;
+  showTypingIndicator();
+
+  const t = I18N[window.currentLang || 'th'];
+
+  if(CHATBOT_API_URL.includes('YOUR-CHATBOT-DEPLOYMENT-ID')){
+    removeTypingIndicator();
+    appendChatMessage(t['chat.errorConfig'], 'error');
+    chatIsSending = false;
+    chatSendBtn.disabled = false;
+    return;
+  }
+
+  try{
+    const res = await fetch(CHATBOT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // ใช้ text/plain เพื่อเลี่ยง CORS preflight กับ Apps Script
+      body: JSON.stringify({ question: question, history: chatHistory.slice(0, -1) })
+    });
+
+    if(!res.ok) throw new Error('เซิร์ฟเวอร์ตอบกลับผิดพลาด (สถานะ ' + res.status + ')');
+
+    const data = await res.json();
+    removeTypingIndicator();
+
+    if(data.error){
+      appendChatMessage(data.error, 'error');
+    }else{
+      appendChatMessage(data.answer, 'bot');
+      chatHistory.push({ role: 'bot', text: data.answer });
+      if(!chatOpened) chatUnreadDot.classList.add('show');
+    }
+  }catch(err){
+    console.error('Chatbot error:', err);
+    removeTypingIndicator();
+    appendChatMessage(t['chat.errorGeneric'], 'error');
+  }finally{
+    chatIsSending = false;
+    chatSendBtn.disabled = false;
+  }
+}
+
+chatSendBtn.addEventListener('click', sendChatMessage);
+chatInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+// ขยายกล่องข้อความอัตโนมัติตามเนื้อหาที่พิมพ์ (สูงสุดตาม max-height ใน CSS)
+chatInput.addEventListener('input', () => {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = chatInput.scrollHeight + 'px';
+});
+</script>
+
+
+</body>
+</html>
