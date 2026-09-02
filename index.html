@@ -509,12 +509,12 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
     <h2 class="section-title" data-i18n="cat.title">ประเภทภาพที่เราถ่าย</h2>
     <div class="rule"></div>
     <div class="cat-grid">
-      <div class="cat-card"><span class="cat-icon">🎭</span><div class="cat-title">Portrait</div><p class="cat-desc" data-i18n="cat.portrait">ภาพบุคคล จับอารมณ์และบุคลิกภาพ ทั้งในสตูดิโอและกลางแจ้ง</p></div>
-      <div class="cat-card"><span class="cat-icon">🏛️</span><div class="cat-title">Architecture</div><p class="cat-desc" data-i18n="cat.architecture">ภาพสถาปัตยกรรม มุมมองเรขาคณิต และพื้นที่รอบโรงเรียน</p></div>
-      <div class="cat-card"><span class="cat-icon">🌿</span><div class="cat-title">Nature</div><p class="cat-desc" data-i18n="cat.nature">ภาพธรรมชาติ แสงธรรมชาติ และโลกจิ๋วผ่านมุมมองมาโคร</p></div>
-      <div class="cat-card"><span class="cat-icon">📸</span><div class="cat-title">Street & Event</div><p class="cat-desc" data-i18n="cat.street">ภาพกิจกรรม งานโรงเรียน และ Street Photography ในชีวิตประจำวัน</p></div>
-      <div class="cat-card"><span class="cat-icon">🎨</span><div class="cat-title">Creative</div><p class="cat-desc" data-i18n="cat.creative">ภาพสร้างสรรค์ long exposure, ซิลูเอต และการทดลองเทคนิคพิเศษ</p></div>
-      <div class="cat-card"><span class="cat-icon">✏️</span><div class="cat-title">Editing</div><p class="cat-desc" data-i18n="cat.editing">เรียนรู้การตกแต่งภาพด้วยโปรแกรมแต่งภาพ เช่น Lightroom</p></div>
+      <div class="cat-card"><span class="cat-icon"></span><img src="portrait.png" alt="Portrait Icon"></span><div class="cat-title">Portrait</div><p class="cat-desc" data-i18n="cat.portrait">ภาพบุคคล จับอารมณ์และบุคลิกภาพ ทั้งในสตูดิโอและกลางแจ้ง</p></div>
+      <div class="cat-card"><span class="cat-icon"></span><img src="cottage.png" alt="Architecture Icon"></span><div class="cat-title">Architecture</div><p class="cat-desc" data-i18n="cat.architecture">ภาพสถาปัตยกรรม มุมมองเรขาคณิต และพื้นที่รอบโรงเรียน</p></div>
+      <div class="cat-card"><span class="cat-icon"></span><img src="leaf.png" alt="Nature Icon"></span><div class="cat-title">Nature</div><p class="cat-desc" data-i18n="cat.nature">ภาพธรรมชาติ แสงธรรมชาติ และโลกจิ๋วผ่านมุมมองมาโคร</p></div>
+      <div class="cat-card"><span class="cat-icon"></span><img src="camera.png" alt="Camera Icon"></span><div class="cat-title">Street & Event</div><p class="cat-desc" data-i18n="cat.street">ภาพกิจกรรม งานโรงเรียน และ Street Photography ในชีวิตประจำวัน</p></div>
+      <div class="cat-card"><span class="cat-icon"></span><img src="paint.png" alt="Paint Icon"></span><div class="cat-title">Creative</div><p class="cat-desc" data-i18n="cat.creative">ภาพสร้างสรรค์ long exposure, ซิลูเอต และการทดลองเทคนิคพิเศษ</p></div>
+      <div class="cat-card"><span class="cat-icon"></span><img src="gallery.png" alt="Gallery Icon"></span><div class="cat-title">Editing</div><p class="cat-desc" data-i18n="cat.editing">เรียนรู้การตกแต่งภาพด้วยโปรแกรมแต่งภาพ เช่น Lightroom</p></div>
     </div>
   </div>
 </section>
@@ -644,7 +644,7 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
 
 <div class="chat-box" id="chatBox" role="dialog" aria-modal="false" aria-labelledby="chatBoxTitle">
   <div class="chat-header">
-    <div class="chat-header-icon">📷</div>
+    <div class="chat-header-icon"><img src="camera.png" alt="Chat Icon"></div>
     <div class="chat-header-text">
       <h4 id="chatBoxTitle" data-i18n="chat.title">ชมรมถ่ายภาพ</h4>
       <span data-i18n="chat.online">พร้อมตอบคำถาม</span>
@@ -768,15 +768,15 @@ const I18N = {
     "help.step4Title": "เปลี่ยนภาษา",
     "help.step4Body": "กดปุ่ม TH/EN มุมขวาบน เพื่อสลับภาษาของเมนูและข้อความในเว็บไซต์",
     "hero.school": "โรงเรียนลาซาล · กรุงเทพมหานคร",
-    "hero.desc": "เรียนรู้ศิลปะการถ่ายภาพ พัฒนาทักษะ และบันทึกช่วงเวลาสวยงามในโรงเรียนกับเพื่อนๆ",
-    "hero.ctaAbout": "รู้จักชมรม",
+    "hero.desc": "บันทึกช่วงเวลาที่สวยงามในโรงเรียนไปกับพวกเรา",
+    "hero.ctaAbout": "รู้จักชมรมเรา",
     "hero.ctaWork": "ดูผลงาน",
     "about.label": "// 01 — ABOUT",
     "about.title": "ชมรมถ่ายภาพคืออะไร?",
     "about.p1": "ชมรมถ่ายภาพโรงเรียนลาซาล เป็นพื้นที่สำหรับนักเรียนที่มีใจรักในศิลปะการถ่ายภาพ ทั้งมือใหม่และผู้มีประสบการณ์",
     "about.p2": "ไม่ว่าจะเป็นภาพบุคคล ภาพทิวทัศน์ ภาพสถาปัตยกรรม หรือภาพงานอีเวนต์ ชมรมของเรามีกิจกรรมที่หลากหลายตลอดปีการศึกษา",
-    "about.statFree": "ไม่มีค่าใช้จ่าย",
-    "about.statGrade": "ระดับชั้น",
+    "about.statFree": "สามารถสมัครได้โดยไม่มีกล้อง",
+    "about.statGrade": "ค้นหาภาพกิจกรรมได้ง่ายผ่านเมนู \"คลังภาพ\"",
     "about.skillTag": "สิ่งที่จะได้รับ",
     "about.skillBody": "เรียนรู้เทคนิคการถ่ายภาพและตกแต่งภาพ ฝึกทำงานร่วมกับทีม แสดงผลงานในนิทรรศการ และได้เพื่อนที่สนใจเรื่องเดียวกัน",
     "about.timelineTag": "// 02 — กำหนดการรับสมัคร",
@@ -802,7 +802,7 @@ const I18N = {
     "archive.results": "ผลการค้นหา",
     "archive.emptyPrefix": "ไม่พบงานที่ตรงกับ \"",
     "archive.emptySuffix": "\"",
-    "archive.emptyHint": "ลองค้นหาด้วยคำอื่น เช่น ชื่องาน ปี พ.ศ. หรือประเภทกิจกรรม",
+    "archive.emptyHint": "ลองค้นหาด้วยคำอื่น เช่น STEAM Day, 2569, หรือประเภทกิจกรรม",
     "archive.loading": "กำลังโหลดข้อมูลงาน...",
     "archive.errorTitle": "ไม่สามารถโหลดข้อมูลได้ในขณะนี้",
     "archive.driveBtn": "เปิดใน Google Drive",
