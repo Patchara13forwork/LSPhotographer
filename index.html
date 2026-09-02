@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ชมรมถ่ายภาพโรงเรียนลาซาล</title>
 <link rel="icon" type="image/jpeg" href="https://lh3.googleusercontent.com/d/1ljlTSC87QUbqZXWfyqsRQA0xkfFxRfFm">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8102e">
+<link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1ljlTSC87QUbqZXWfyqsRQA0xkfFxRfFm">
 <script>
 // ตั้งค่า theme/cvd ก่อนหน้าเว็บ render เพื่อไม่ให้เห็นการกระพริบสีผิดตอนโหลด
 (function(){
@@ -66,7 +69,7 @@ body::after{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);
 .settings{position:relative}
 .settings-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--card2);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s;}
 .settings-btn:hover{border-color:var(--red);color:var(--red)}
-.settings-panel{position:absolute;top:calc(100% + .75rem);right:0;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:.5rem;width:250px;display:none;box-shadow:0 16px 48px rgba(0,0,0,0.45);}
+.settings-panel{position:absolute;top:calc(100% + .75rem);right:0;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:.5rem;width:250px;display:none;box-shadow:0 16px 48px rgba(0,0,0,0.45);max-height:calc(100vh - 5rem);overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .settings-panel.open{display:block}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:.65rem .75rem;border-radius:6px;transition:background .15s;}
 .settings-row:hover{background:color-mix(in srgb, var(--red) 5%, transparent)}
@@ -140,6 +143,9 @@ body::after{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);
 @media(max-width:768px){
   .chat-box{width:calc(100vw - 1.5rem);right:.75rem;bottom:4.75rem;height:min(65vh,480px);}
   .chat-fab{right:1rem;bottom:1rem}
+  /* บังคับ font-size 16px ขึ้นไป เพื่อป้องกัน mobile browser (Safari/Chrome) auto-zoom
+     เข้า input เวลาผู้ใช้แตะเพื่อพิมพ์ (พฤติกรรมมาตรฐานเมื่อ font-size ต่ำกว่า 16px) */
+  .chat-input{font-size:16px}
 }
 
 nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 3rem;background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border2);}
@@ -324,7 +330,6 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
   .help-modal-box{width:94vw;max-height:85vh}
 }
 </style>
-<base target="_blank">
 </head>
 <body>
 
@@ -374,6 +379,12 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
             <button class="settings-chip" data-cvd-opt="tritanopia" data-i18n="prefs.cvdTri">Tritanopia (ตาบอดสีน้ำเงิน)</button>
           </div>
         </div>
+
+        <div class="settings-divider"></div>
+
+        <button class="settings-row settings-link-row" id="notifyBtn">
+          <span class="settings-row-label" id="notifyBtnLabel" data-i18n="notify.enable">เปิดการแจ้งเตือน</span>
+        </button>
 
         <div class="settings-divider"></div>
 
@@ -471,7 +482,7 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
 
     <div class="about-cta">
       <p data-i18n="about.ctaBody">ติดตามข่าวสารได้ที่ Instagram ของชมรม</p>
-      <a href="https://www.instagram.com/photographer.lsc" class="btn-ghost" data-i18n="about.ctaBtn">ติดตามข่าวสาร</a>
+      <a href="https://www.instagram.com/photographer.lsc" class="btn-ghost" target="_blank" rel="noopener" data-i18n="about.ctaBtn">ติดตามข่าวสาร</a>
     </div>
   </div>
 </section>
@@ -613,8 +624,8 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
     <div class="footer-col">
       <h4 data-i18n="footer.contact">CONTACT US</h4>
       <ul>
-        <li><a href="https://www.instagram.com/photographer.lsc?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="blank">Instagram : photographer.lsc</a></li>
-        <li><a href="https://www.facebook.com/profile.php?id=100088554210023&locale=th_TH" target="blank">Facebook : LSC Photographer</a></li>
+        <li><a href="https://www.instagram.com/photographer.lsc?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram : photographer.lsc</a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=100088554210023&locale=th_TH" target="_blank" rel="noopener">Facebook : LSC Photographer</a></li>
       </ul>
     </div>
   </div>
@@ -731,6 +742,13 @@ const I18N = {
     "nav.faqs": "FAQs",
     "nav.join": "สมัครเข้าร่วมชมรม",
     "help.menuLabel": "วิธีใช้เว็บไซต์",
+    "notify.enable": "เปิดการแจ้งเตือน",
+    "notify.enabled": "เปิดแจ้งเตือนแล้ว ✓",
+    "notify.blocked": "แจ้งเตือนถูกบล็อกไว้",
+    "notify.unavailable": "ฟีเจอร์นี้ยังไม่พร้อมใช้งาน",
+    "notify.notSupported": "อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน",
+    "notify.blockedHint": "การแจ้งเตือนถูกบล็อกไว้ กรุณาเปิดใช้งานผ่านการตั้งค่าเบราว์เซอร์ของคุณ",
+    "notify.errorGeneric": "เปิดใช้งานการแจ้งเตือนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
     "prefs.colorMode": "โหมดสี",
     "prefs.langLabel": "ภาษา",
     "prefs.dark": "มืด",
@@ -833,6 +851,13 @@ const I18N = {
     "nav.faqs": "FAQs",
     "nav.join": "Join Us",
     "help.menuLabel": "How to use this site",
+    "notify.enable": "Enable notifications",
+    "notify.enabled": "Notifications on ✓",
+    "notify.blocked": "Notifications blocked",
+    "notify.unavailable": "This feature isn't set up yet",
+    "notify.notSupported": "This device or browser doesn't support notifications",
+    "notify.blockedHint": "Notifications are blocked. Please enable them in your browser settings.",
+    "notify.errorGeneric": "Couldn't enable notifications. Please try again.",
     "prefs.colorMode": "Color mode",
     "prefs.langLabel": "Language",
     "prefs.dark": "Dark",
@@ -1194,6 +1219,16 @@ document.getElementById('searchInput').addEventListener('input',(e)=>{
 
 loadEvents();
 
+// ลงทะเบียน service worker ตั้งแต่โหลดหน้าเว็บ (ไม่รอผู้ใช้กดเปิดแจ้งเตือนก่อน)
+// เพื่อให้ browser พิจารณาเว็บนี้ว่า "ติดตั้งเป็นแอปได้" (installable) ตั้งแต่แรกเข้า
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(err => {
+      console.warn('ลงทะเบียน service worker ไม่สำเร็จ (อาจเป็นเพราะยังไม่ได้ตั้งค่า Firebase):', err);
+    });
+  });
+}
+
 // ===================== CHATBOT WIDGET =====================
 // แก้บรรทัดนี้เป็น URL ของ Apps Script Web App ของ chatbot (deploy แยกจาก Sheet API)
 // (ดูวิธีหา URL นี้ใน CHATBOT-SETUP-GUIDE.md)
@@ -1344,6 +1379,114 @@ chatInput.addEventListener('input', () => {
   chatInput.style.height = 'auto';
   chatInput.style.height = chatInput.scrollHeight + 'px';
 });
+
+// ===================== PUSH NOTIFICATION =====================
+// แก้ค่าตรงนี้ให้ตรงกับโปรเจกต์ Firebase ของพี่ (เหมือนกับที่ใส่ใน firebase-messaging-sw.js)
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD-KqwYcCjOHUE8QfUUyZSvErwXRUR7rAI",
+  authDomain: "lsphotograph.firebaseapp.com",
+  projectId: "lsphotograph",
+  storageBucket: "lsphotograph.firebasestorage.app",
+  messagingSenderId: "726534852359",
+  appId: "1:726534852359:web:75c2e902e9e3221b747fa2"
+};
+// VAPID public key จาก Firebase Console > Project Settings > Cloud Messaging > Web configuration
+const FIREBASE_VAPID_KEY = "BJOcNokVg99B_ovJxfMkz72xwGnqSqKippZZrvUv8RLIxel7PysYx_Qw6f8fqp1pSMqAIxPP_BYwgVcHmhRVioI";
+// URL ของ push backend (Apps Script ตัวใหม่ที่ deploy แยกจาก Sheet API และ chatbot)
+const PUSH_API_URL = "https://script.google.com/macros/s/AKfycbyg_Ixw0QhXEO2-GSFToTVIhMB7pZ944NxcjIon_XeqCVkMNpZSBRZAr-XzjBaXeos/exec";
+
+const notifyBtn = document.getElementById('notifyBtn');
+const notifyBtnLabel = document.getElementById('notifyBtnLabel');
+let firebaseMessaging = null;
+
+function isPushConfigured(){
+  return !FIREBASE_CONFIG.apiKey.includes('ใส่_') && !PUSH_API_URL.includes('YOUR-PUSH-DEPLOYMENT-ID');
+}
+
+function updateNotifyButtonLabel(){
+  const t = I18N[window.currentLang || 'th'];
+  if(!('Notification' in window) || !isPushConfigured()){
+    notifyBtnLabel.textContent = t['notify.unavailable'];
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    notifyBtnLabel.textContent = t['notify.enabled'];
+  }else if(Notification.permission === 'denied'){
+    notifyBtnLabel.textContent = t['notify.blocked'];
+  }else{
+    notifyBtnLabel.textContent = t['notify.enable'];
+  }
+}
+
+function loadScript(src){
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function enablePushNotifications(){
+  const t = I18N[window.currentLang || 'th'];
+
+  if(!isPushConfigured()){
+    alert(t['notify.unavailable']);
+    return;
+  }
+  if(!('Notification' in window) || !('serviceWorker' in navigator)){
+    alert(t['notify.notSupported']);
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    alert(t['notify.blockedHint']);
+    return;
+  }
+
+  try{
+    // โหลด Firebase SDK แบบ lazy (โหลดเฉพาะตอนผู้ใช้กดเปิดแจ้งเตือนจริงๆ ไม่ถ่วงเวลาโหลดหน้าเว็บหลัก)
+    if(!window.firebase){
+      await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
+    }
+    if(!firebase.apps.length){
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    firebaseMessaging = firebase.messaging();
+
+    const permission = await Notification.requestPermission();
+    if(permission !== 'granted'){
+      updateNotifyButtonLabel();
+      return;
+    }
+
+    // navigator.serviceWorker.ready จะได้ registration ตัวเดียวกับที่ลงทะเบียนไว้ตอนโหลดหน้าเว็บ
+    // (เรียก .register() ซ้ำได้ผลเหมือนกันเพราะ browser คืน registration เดิมถ้า URL ตรงกัน แต่ใช้ .ready ชัดเจนกว่า)
+    const registration = await navigator.serviceWorker.ready;
+    const token = await firebaseMessaging.getToken({
+      vapidKey: FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration
+    });
+
+    if(!token) throw new Error('ไม่ได้รับ token จาก Firebase');
+
+    // ส่ง token ไปเก็บที่ backend
+    await fetch(PUSH_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'register', token: token })
+    });
+
+    updateNotifyButtonLabel();
+  }catch(err){
+    console.error('เปิดใช้งานแจ้งเตือนไม่สำเร็จ:', err);
+    alert(t['notify.errorGeneric']);
+  }
+}
+
+notifyBtn.addEventListener('click', enablePushNotifications);
+updateNotifyButtonLabel();
 </script>
 
 
