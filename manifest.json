@@ -1,0 +1,32 @@
+{
+  "name": "ชมรมถ่ายภาพ โรงเรียนลาซาล",
+  "short_name": "LS Photographer",
+  "description": "คลังภาพและข้อมูลกิจกรรมของชมรมถ่ายภาพ โรงเรียนลาซาล",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0c",
+  "theme_color": "#c8102e",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/d/1ljlTSC87QUbqZXWfyqsRQA0xkfFxRfFm",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1ljlTSC87QUbqZXWfyqsRQA0xkfFxRfFm",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1ljlTSC87QUbqZXWfyqsRQA0xkfFxRfFm",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
