@@ -112,7 +112,8 @@ body::after{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);
 .chat-box{position:fixed;bottom:5.5rem;right:1.5rem;z-index:400;width:360px;max-width:calc(100vw - 2rem);height:min(520px,70vh);background:var(--card2);border:1px solid var(--border2);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.45);display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(10px);}
 .chat-box.open{display:flex}
 .chat-header{background:color-mix(in srgb, var(--bg) 92%, transparent);border-bottom:1px solid var(--border2);padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem;}
-.chat-header-icon{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.chat-header-icon{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;overflow:hidden;}
+.chat-header-icon img{width:20px;height:20px;object-fit:contain;}
 .chat-header-text h4{font-family:var(--ff-display);font-size:.95rem;color:var(--cream);line-height:1.2;}
 .chat-header-text span{font-family:var(--ff-mono);font-size:.62rem;color:var(--muted);display:flex;align-items:center;gap:.3rem;}
 .chat-header-text span::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;}
@@ -216,6 +217,7 @@ h2.section-title{font-family:var(--ff-display);font-size:clamp(2rem,5vw,3rem);fo
 .cat-card{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:1.75rem 1.5rem;position:relative;transition:border-color .25s,background .25s;cursor:default;}
 .cat-card:hover{border-color:color-mix(in srgb, var(--red) 40%, var(--border2));background:color-mix(in srgb, var(--red) 3%, var(--card2));}
 .cat-icon{font-size:1.6rem;margin-bottom:.85rem;display:block}
+.cat-icon img{width:32px;height:32px;object-fit:contain;display:block}
 .cat-title{font-family:var(--ff-display);font-size:1.1rem;color:var(--cream);margin-bottom:.4rem}
 .cat-desc{font-size:.78rem;color:var(--muted);line-height:1.65}
 
@@ -309,7 +311,7 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
 @media(max-width:768px){
   nav{padding:1rem 1.25rem}
   .hamburger{display:flex}
-  .nav-menu{display:none;flex-direction:column;position:absolute;top:100%;left:0;width:100%;background:color-mix(in srgb, var(--bg) 98%, transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border2);padding:2rem;gap:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+  .nav-menu{display:none;flex-direction:column;position:absolute;top:100%;left:0;width:100%;max-height:calc(100vh - 5rem);overflow-y:auto;-webkit-overflow-scrolling:touch;background:color-mix(in srgb, var(--bg) 98%, transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border2);padding:2rem;gap:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
   .nav-menu.active{display:flex}
   .nav-links{flex-direction:column;align-items:center;gap:1.5rem;width:100%;}
   .hamburger.active span:nth-child(1){transform:translateY(8px) rotate(45deg)}
@@ -326,7 +328,8 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
   .result-item{flex-direction:column;align-items:flex-start;gap:.3rem}
   .result-date{min-width:auto}
   .footer-bottom{flex-direction:column;gap:.5rem;text-align:center}
-  .settings-panel{right:-1rem;width:230px}
+  .settings-panel{position:static;right:auto;width:100%;max-height:none;overflow-y:visible;margin-top:.75rem;box-shadow:none;}
+  .settings{width:100%}
   .help-modal-box{width:94vw;max-height:85vh}
 }
 </style>
@@ -482,7 +485,7 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
 
     <div class="about-cta">
       <p data-i18n="about.ctaBody">ติดตามข่าวสารได้ที่ Instagram ของชมรม</p>
-      <a href="https://www.instagram.com/photographer.lsc" class="btn-ghost" target="_blank" rel="noopener" data-i18n="about.ctaBtn">ติดตามข่าวสาร</a>
+      <a href="https://www.instagram.com/photographer.lsbk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" class="btn-ghost" target="_blank" rel="noopener" data-i18n="about.ctaBtn">ติดตามข่าวสาร</a>
     </div>
   </div>
 </section>
@@ -509,12 +512,12 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
     <h2 class="section-title" data-i18n="cat.title">ประเภทภาพที่เราถ่าย</h2>
     <div class="rule"></div>
     <div class="cat-grid">
-      <div class="cat-card"><span class="cat-icon"></span><img src="portrait.png" alt="Portrait Icon"></span><div class="cat-title">Portrait</div><p class="cat-desc" data-i18n="cat.portrait">ภาพบุคคล จับอารมณ์และบุคลิกภาพ ทั้งในสตูดิโอและกลางแจ้ง</p></div>
-      <div class="cat-card"><span class="cat-icon"></span><img src="museum.png" alt="Architecture Icon"></span><div class="cat-title">Architecture</div><p class="cat-desc" data-i18n="cat.architecture">ภาพสถาปัตยกรรม มุมมองเรขาคณิต และพื้นที่รอบโรงเรียน</p></div>
-      <div class="cat-card"><span class="cat-icon"></span><img src="park.png" alt="Nature Icon"></span><div class="cat-title">Nature</div><p class="cat-desc" data-i18n="cat.nature">ภาพธรรมชาติ แสงธรรมชาติ และโลกจิ๋วผ่านมุมมองมาโคร</p></div>
-      <div class="cat-card"><span class="cat-icon"></span><img src="camera.png" alt="Camera Icon"></span><div class="cat-title">Street & Event</div><p class="cat-desc" data-i18n="cat.street">ภาพกิจกรรม งานโรงเรียน และ Street Photography ในชีวิตประจำวัน</p></div>
-      <div class="cat-card"><span class="cat-icon"></span><img src="art.png" alt="Paint Icon"></span><div class="cat-title">Creative</div><p class="cat-desc" data-i18n="cat.creative">ภาพสร้างสรรค์ long exposure, ซิลูเอต และการทดลองเทคนิคพิเศษ</p></div>
-      <div class="cat-card"><span class="cat-icon"></span><img src="photo-editing.png" alt="Gallery Icon"></span><div class="cat-title">Editing</div><p class="cat-desc" data-i18n="cat.editing">เรียนรู้การตกแต่งภาพด้วยโปรแกรมแต่งภาพ เช่น Lightroom</p></div>
+      <div class="cat-card"><span class="cat-icon"><img src="portrait.png" alt="Portrait Icon"></span><div class="cat-title">Portrait</div><p class="cat-desc" data-i18n="cat.portrait">ภาพบุคคล จับอารมณ์และบุคลิกภาพ ทั้งในสตูดิโอและกลางแจ้ง</p></div>
+      <div class="cat-card"><span class="cat-icon"><img src="museum.png" alt="Architecture Icon"></span><div class="cat-title">Architecture</div><p class="cat-desc" data-i18n="cat.architecture">ภาพสถาปัตยกรรม มุมมองเรขาคณิต และพื้นที่รอบโรงเรียน</p></div>
+      <div class="cat-card"><span class="cat-icon"><img src="park.png" alt="Nature Icon"></span><div class="cat-title">Nature</div><p class="cat-desc" data-i18n="cat.nature">ภาพธรรมชาติ แสงธรรมชาติ และโลกจิ๋วผ่านมุมมองมาโคร</p></div>
+      <div class="cat-card"><span class="cat-icon"><img src="camera.png" alt="Camera Icon"></span><div class="cat-title">Street & Event</div><p class="cat-desc" data-i18n="cat.street">ภาพกิจกรรม งานโรงเรียน และ Street Photography ในชีวิตประจำวัน</p></div>
+      <div class="cat-card"><span class="cat-icon"><img src="art.png" alt="Paint Icon"></span><div class="cat-title">Creative</div><p class="cat-desc" data-i18n="cat.creative">ภาพสร้างสรรค์ long exposure, ซิลูเอต และการทดลองเทคนิคพิเศษ</p></div>
+      <div class="cat-card"><span class="cat-icon"><img src="photo-editing.png" alt="Gallery Icon"></span><div class="cat-title">Editing</div><p class="cat-desc" data-i18n="cat.editing">เรียนรู้การตกแต่งภาพด้วยโปรแกรมแต่งภาพ เช่น Lightroom</p></div>
     </div>
   </div>
 </section>
@@ -624,13 +627,13 @@ footer{background:var(--bg);border-top:1px solid var(--border2);padding:3.5rem 2
     <div class="footer-col">
       <h4 data-i18n="footer.contact">CONTACT US</h4>
       <ul>
-        <li><a href="https://www.instagram.com/photographer.lsc?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram : photographer.lsc</a></li>
+        <li><a href="https://www.instagram.com/photographer.lsbk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram : photographer.lsbk</a></li>
         <li><a href="https://www.facebook.com/profile.php?id=100088554210023&locale=th_TH" target="_blank" rel="noopener">Facebook : LSC Photographer</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <span data-i18n="footer.copyright">© 2569 ชมรมถ่ายภาพ โรงเรียนลาซาล</span>
+    <span data-i18n="footer.copyright">© ชมรมถ่ายภาพ โรงเรียนลาซาล</span>
     <span data-i18n="footer.joinSoon">สมัครเข้าร่วมชมรม — เปิดรับเร็ว ๆ นี้</span>
   </div>
 </footer>
@@ -1306,7 +1309,12 @@ function toggleChatBox(){
   if(chatOpened){
     chatUnreadDot.classList.remove('show');
     initChatGreeting();
-    chatInput.focus();
+    // ไม่ auto-focus บนจอเล็ก (มือถือ) เพราะ browser จะ zoom/เลื่อนจอเข้าไปหา input
+    // ทันทีที่ถูก focus แบบไม่ได้มาจากการแตะที่ input โดยตรง ทำให้ดูเหมือนเว็บ "ซูมเอง"
+    // บนจอใหญ่ (desktop) ยังคง auto-focus ไว้เพื่อความสะดวก พิมพ์ได้เลยไม่ต้องคลิกเพิ่ม
+    if(window.innerWidth > 768){
+      chatInput.focus();
+    }
   }
 }
 
